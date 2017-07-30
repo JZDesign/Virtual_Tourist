@@ -16,8 +16,8 @@ extension Pin {
         return NSFetchRequest<Pin>(entityName: "Pin")
     }
 
-    @NSManaged public var latitude: Float
-    @NSManaged public var longitude: Float
+    @NSManaged public var latitude: Double
+    @NSManaged public var longitude: Double
     @NSManaged public var photos: NSSet?
 
 }

@@ -12,13 +12,13 @@
 		4208829F1F2E3DA900A7598C /* Virtual_Tourist.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 4208829D1F2E3DA900A7598C /* Virtual_Tourist.xcdatamodeld */; };
 		420882A11F2E3DA900A7598C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 420882A01F2E3DA900A7598C /* Assets.xcassets */; };
 		420882A41F2E3DA900A7598C /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 420882A21F2E3DA900A7598C /* LaunchScreen.storyboard */; };
-		420882B31F2E41C900A7598C /* Photo+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 420882AF1F2E41C900A7598C /* Photo+CoreDataClass.swift */; };
-		420882B41F2E41C900A7598C /* Photo+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 420882B01F2E41C900A7598C /* Photo+CoreDataProperties.swift */; };
-		420882B51F2E41C900A7598C /* Pin+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 420882B11F2E41C900A7598C /* Pin+CoreDataClass.swift */; };
-		420882B61F2E41C900A7598C /* Pin+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 420882B21F2E41C900A7598C /* Pin+CoreDataProperties.swift */; };
 		420882B81F2E42D900A7598C /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 420882B71F2E42D900A7598C /* Constants.swift */; };
 		420882BA1F2E49CF00A7598C /* MapViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 420882B91F2E49CF00A7598C /* MapViewController.swift */; };
 		420882BC1F2E4A3E00A7598C /* ActivityIndicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 420882BB1F2E4A3E00A7598C /* ActivityIndicator.swift */; };
+		4283F0BE1F2E61A2008C4CF5 /* Pin+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4283F0BA1F2E61A2008C4CF5 /* Pin+CoreDataClass.swift */; };
+		4283F0BF1F2E61A2008C4CF5 /* Pin+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4283F0BB1F2E61A2008C4CF5 /* Pin+CoreDataProperties.swift */; };
+		4283F0C01F2E61A2008C4CF5 /* Photo+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4283F0BC1F2E61A2008C4CF5 /* Photo+CoreDataClass.swift */; };
+		4283F0C11F2E61A2008C4CF5 /* Photo+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4283F0BD1F2E61A2008C4CF5 /* Photo+CoreDataProperties.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -29,13 +29,13 @@
 		420882A01F2E3DA900A7598C /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		420882A31F2E3DA900A7598C /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		420882A51F2E3DA900A7598C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		420882AF1F2E41C900A7598C /* Photo+CoreDataClass.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = "Photo+CoreDataClass.swift"; path = "../Photo+CoreDataClass.swift"; sourceTree = "<group>"; };
-		420882B01F2E41C900A7598C /* Photo+CoreDataProperties.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = "Photo+CoreDataProperties.swift"; path = "../Photo+CoreDataProperties.swift"; sourceTree = "<group>"; };
-		420882B11F2E41C900A7598C /* Pin+CoreDataClass.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = "Pin+CoreDataClass.swift"; path = "../Pin+CoreDataClass.swift"; sourceTree = "<group>"; };
-		420882B21F2E41C900A7598C /* Pin+CoreDataProperties.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = "Pin+CoreDataProperties.swift"; path = "../Pin+CoreDataProperties.swift"; sourceTree = "<group>"; };
 		420882B71F2E42D900A7598C /* Constants.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
 		420882B91F2E49CF00A7598C /* MapViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MapViewController.swift; sourceTree = "<group>"; };
 		420882BB1F2E4A3E00A7598C /* ActivityIndicator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ActivityIndicator.swift; sourceTree = "<group>"; };
+		4283F0BA1F2E61A2008C4CF5 /* Pin+CoreDataClass.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = "Pin+CoreDataClass.swift"; path = "../Pin+CoreDataClass.swift"; sourceTree = "<group>"; };
+		4283F0BB1F2E61A2008C4CF5 /* Pin+CoreDataProperties.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = "Pin+CoreDataProperties.swift"; path = "../Pin+CoreDataProperties.swift"; sourceTree = "<group>"; };
+		4283F0BC1F2E61A2008C4CF5 /* Photo+CoreDataClass.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = "Photo+CoreDataClass.swift"; path = "../Photo+CoreDataClass.swift"; sourceTree = "<group>"; };
+		4283F0BD1F2E61A2008C4CF5 /* Photo+CoreDataProperties.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = "Photo+CoreDataProperties.swift"; path = "../Photo+CoreDataProperties.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -109,10 +109,10 @@
 		420882AE1F2E41B000A7598C /* CoreData */ = {
 			isa = PBXGroup;
 			children = (
-				420882AF1F2E41C900A7598C /* Photo+CoreDataClass.swift */,
-				420882B01F2E41C900A7598C /* Photo+CoreDataProperties.swift */,
-				420882B11F2E41C900A7598C /* Pin+CoreDataClass.swift */,
-				420882B21F2E41C900A7598C /* Pin+CoreDataProperties.swift */,
+				4283F0BA1F2E61A2008C4CF5 /* Pin+CoreDataClass.swift */,
+				4283F0BB1F2E61A2008C4CF5 /* Pin+CoreDataProperties.swift */,
+				4283F0BC1F2E61A2008C4CF5 /* Photo+CoreDataClass.swift */,
+				4283F0BD1F2E61A2008C4CF5 /* Photo+CoreDataProperties.swift */,
 			);
 			name = CoreData;
 			sourceTree = "<group>";
@@ -191,12 +191,12 @@
 			buildActionMask = 2147483647;
 			files = (
 				4208829F1F2E3DA900A7598C /* Virtual_Tourist.xcdatamodeld in Sources */,
-				420882B31F2E41C900A7598C /* Photo+CoreDataClass.swift in Sources */,
-				420882B61F2E41C900A7598C /* Pin+CoreDataProperties.swift in Sources */,
-				420882B51F2E41C900A7598C /* Pin+CoreDataClass.swift in Sources */,
-				420882B41F2E41C900A7598C /* Photo+CoreDataProperties.swift in Sources */,
 				420882971F2E3DA900A7598C /* AppDelegate.swift in Sources */,
+				4283F0C01F2E61A2008C4CF5 /* Photo+CoreDataClass.swift in Sources */,
 				420882B81F2E42D900A7598C /* Constants.swift in Sources */,
+				4283F0BF1F2E61A2008C4CF5 /* Pin+CoreDataProperties.swift in Sources */,
+				4283F0BE1F2E61A2008C4CF5 /* Pin+CoreDataClass.swift in Sources */,
+				4283F0C11F2E61A2008C4CF5 /* Photo+CoreDataProperties.swift in Sources */,
 				420882BC1F2E4A3E00A7598C /* ActivityIndicator.swift in Sources */,
 				420882BA1F2E49CF00A7598C /* MapViewController.swift in Sources */,
 			);
@@ -364,6 +364,7 @@
 				420882AA1F2E3DA900A7598C /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 
