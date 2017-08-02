@@ -20,10 +20,8 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
     
     
     var annotation:MKAnnotation!
-    // tap recognition to add pins
-    var tapRecognizer = UITapGestureRecognizer()
+   
     var longRecognizer = UILongPressGestureRecognizer()
-    // location manager to find user location
     
     
     var pins = [Pin]()
@@ -32,6 +30,7 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
     
     @IBOutlet var mapView: MKMapView!
     
+    // location manager to find user location
     var locationManager = CLLocationManager()
 
     
@@ -44,12 +43,10 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
     override func viewDidLoad() {
         super.viewDidLoad()
 
+        // init long gesture recognizer
         longRecognizer = UILongPressGestureRecognizer(target: self, action: #selector(self.longGesture(sender:)))
-        
-        // initialize tap
-        tapRecognizer = UITapGestureRecognizer(target: self, action: #selector(self.tapGestureHandler(sender:)))
-        tapRecognizer.delegate = self
-        mapView.addGestureRecognizer(tapRecognizer)
+        longRecognizer.delegate = self
+        mapView.addGestureRecognizer(longRecognizer)
     
     }
 
@@ -65,7 +62,9 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
             pinview = MKPinAnnotationView(annotation: annotation, reuseIdentifier: id)
             pinview!.canShowCallout = true
             pinview!.pinTintColor = .green
-            pinview!.rightCalloutAccessoryView = UIButton(type: .detailDisclosure)
+            pinview!.canShowCallout = false
+            //pinview!.rightCalloutAccessoryView = UIButton(type: .detailDisclosure)
+            
         } else {
             pinview!.annotation = annotation
         }
@@ -86,34 +85,15 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
     }
     
     
-    // This delegate method is implemented to respond to taps. It opens the system browser
-    // to the URL specified in the annotationViews subtitle property.
-    func mapView(_ mapView: MKMapView, annotationView view: MKAnnotationView, calloutAccessoryControlTapped control: UIControl) {
-        if control == view.rightCalloutAccessoryView {
-            print(view.annotation?.coordinate)
-//            let app = UIApplication.shared
-//            if let toOpen = view.annotation?.subtitle! {
-//                
-//                // create mutable object to edit links
-//                var open = toOpen
-//                // remove spaces to prevent crash
-//                if open.range(of: " ") != nil{
-//                    open = open.replacingOccurrences(of: " ", with: "")
-//                }
-//                // set prefix to aid safari
-//                if (open.range(of: "://") != nil){
-//                    app.open(URL(string: open)!, options: [:] , completionHandler: nil)
-//                } else {
-//                    app.open(URL(string: "http://\(open)")!, options: [:] , completionHandler: nil)
-//                }
-            
-            }
-        
+    func mapView(_ mapView: MKMapView, didSelect view: MKAnnotationView) {
+        print(view.annotation?.coordinate)
     }
     
     
-    
-    
+    func mapView(mapView: MKMapView, didDeselectAnnotationView view: MKAnnotationView) {
+        view.removeGestureRecognizer(view.gestureRecognizers!.first!)
+    }
+       
     
     // remove current pins
     
@@ -125,22 +105,18 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
     // MARK: GESTURE RECOGNIZER
     
     func longGesture(sender: UILongPressGestureRecognizer? = nil) {
+        if ((sender?.state == UIGestureRecognizerState.ended) || (sender?.state == UIGestureRecognizerState.changed) || (sender?.state == UIGestureRecognizerState.failed) ) {
+        } else {
+            let pin = longRecognizer.location(in: mapView)
+            let pinLocation = mapView.convert(pin, toCoordinateFrom: mapView)
+            let pinAnnotation = MKPointAnnotation()
+            pinAnnotation.coordinate = pinLocation
+            self.annotation = pinAnnotation
         
-    }
+            mapView.addAnnotation(self.annotation)
     
-    // Tap Recognizer
-    
-    func tapGestureHandler(sender: UITapGestureRecognizer? = nil) {
-        //removePins()
-        // use tap to pin location
-        let pin = tapRecognizer.location(in: mapView)
-        let pinLocation = mapView.convert(pin, toCoordinateFrom: mapView)
-        let pinAnnotation = MKPointAnnotation()
-        pinAnnotation.coordinate = pinLocation
-        self.annotation = pinAnnotation
+        }
         
-        mapView.addAnnotation(self.annotation)
-        //print(annotation.coordinate)
     }
     
     
