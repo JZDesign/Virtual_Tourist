@@ -18,8 +18,8 @@ struct Constants {
         
         static let SearchBBoxHalfWidth = 1.0
         static let SearchBBoxHalfHeight = 1.0
-        static let SearchLatRange = (-1.0, 1.0)
-        static let SearchLonRange = (-1.0, 1.0)
+        static let SearchLatRange = (-90.0, 90.0)
+        static let SearchLonRange = (-180.0, 180.0)
     }
     
     // MARK: Flickr Parameter Keys

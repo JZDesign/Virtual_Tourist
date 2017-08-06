@@ -43,6 +43,9 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
     override func viewDidLoad() {
         super.viewDidLoad()
 
+        // load previously saved pins
+        loadData()
+        
         // init long gesture recognizer
         longRecognizer = UILongPressGestureRecognizer(target: self, action: #selector(self.longGesture(sender:)))
         longRecognizer.delegate = self
@@ -69,24 +72,14 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
             pinview!.annotation = annotation
         }
         
-        let lat = pinview!.annotation?.coordinate.latitude as! Double
-        let lon = pinview!.annotation?.coordinate.longitude as! Double
-        
-        if let context = getContext() {
-            var pin =  NSEntityDescription.insertNewObject(forEntityName: "Pin", into: context) as! Pin
-            pin.latitude = lat
-            pin.longitude = lon 
-            pins.append(pin)
-        }
-        
-        print(pins.count)
         pinview?.animatesDrop = true
         return pinview
     }
     
     
     func mapView(_ mapView: MKMapView, didSelect view: MKAnnotationView) {
-        print(view.annotation?.coordinate)
+        //print(view.annotation?.coordinate)
+        Client.sharedInstance().setSearchParam(view.annotation?.coordinate.latitude as! Double, view.annotation?.coordinate.longitude as! Double)
     }
     
     
@@ -107,12 +100,30 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
     func longGesture(sender: UILongPressGestureRecognizer? = nil) {
         if ((sender?.state == UIGestureRecognizerState.ended) || (sender?.state == UIGestureRecognizerState.changed) || (sender?.state == UIGestureRecognizerState.failed) ) {
         } else {
+            // create pin for display
             let pin = longRecognizer.location(in: mapView)
             let pinLocation = mapView.convert(pin, toCoordinateFrom: mapView)
             let pinAnnotation = MKPointAnnotation()
             pinAnnotation.coordinate = pinLocation
             self.annotation = pinAnnotation
         
+            // save pin to core data
+            let lat = annotation?.coordinate.latitude as! Double
+            let lon = annotation?.coordinate.longitude as! Double
+            
+            if let context = getContext() {
+                var pin =  NSEntityDescription.insertNewObject(forEntityName: "Pin", into: context) as! Pin
+                pin.latitude = lat
+                pin.longitude = lon
+                pins.append(pin)
+                do {
+                    try (context.save())
+                } catch let err {
+                    print(err)
+                }
+            }
+            
+            // display pins
             mapView.addAnnotation(self.annotation)
     
         }
@@ -133,5 +144,39 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
         return nil
     }
 
+    
+    func loadData() {
+        
+        if let context = getContext() {
+            
+            if let savedPins = fetchPins() {
+                for pin in savedPins {
+                    pins.append(pin)
+                    // display saved pins
+                    
+                    let lat = CLLocationDegrees(pin.latitude)
+                    let long = CLLocationDegrees(pin.longitude)
+                    // The lat and long are used to create a CLLocationCoordinates2D instance.
+                    let coordinate = CLLocationCoordinate2D(latitude: lat, longitude: long)
+                    var annotation = MKPointAnnotation()
+                    annotation.coordinate = coordinate
+                    self.mapView.addAnnotation(annotation)
+                }
+            }
+        }
+    }
+
+    
+    private func fetchPins() -> [Pin]? {
+        if let context = getContext() {
+            let request = NSFetchRequest<NSManagedObject>(entityName: "Pin")
+            do {
+                return try context.fetch(request) as? [Pin]
+            } catch let err {
+                print(err)
+            }
+        }
+        return nil
+    }
 
 }
