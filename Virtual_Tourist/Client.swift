@@ -7,6 +7,8 @@
 //
 
 import Foundation
+import CoreData
+import UIKit
 
 class Client: NSObject {
 
@@ -21,16 +23,21 @@ class Client: NSObject {
             let maxLat = min(lat + Constants.Flickr.SearchBBoxHalfHeight, Constants.Flickr.SearchLatRange.1)
             let maxLong = min(long + Constants.Flickr.SearchBBoxHalfWidth, Constants.Flickr.SearchLonRange.1)
             //print("\(minLong),\(minLat),\(maxLong),\(maxLat)")
-            return("\(minLong),\(minLat),\(maxLong),\(maxLat)")
+            //return("\(minLong),\(minLat),\(maxLong),\(maxLat)")
+            print("\((long - 0.1)) , \((lat - 0.1)) , \((long + 0.1)) , \((lat + 0.1))")
+            return"\((long - 0.1)) , \((lat - 0.1)) , \((long + 0.1)) , \((lat + 0.1))"
         }
         return "0,0,0,0"
     }
     
-    func setSearchParam(_ latitude: Double, _ longitude: Double) {
+    func setSearchParam(_ latitude: Double, _ longitude: Double, completion: @escaping (_ result: AnyObject?, _ error: NSError?) -> Void) {
         
         var methodParameters: [String:AnyObject] = [:]
         
         let searchType = [Constants.FlickrParameterKeys.BoundingBox: bboxString(latitude,longitude)]
+        let accuracy = [Constants.FlickrParameterKeys.Accuracy: 11]
+        let location = [Constants.FlickrParameterKeys.Lat : latitude, Constants.FlickrParameterKeys.Lon : longitude]
+        let amount = ["page": 1, "per_page": 100, "sort": ""] as [String : Any]
         let prefix = [Constants.FlickrParameterKeys.Method: Constants.FlickrParameterValues.SearchMethod,
                       Constants.FlickrParameterKeys.APIKey: Constants.FlickrParameterValues.APIKey]
         let middle = [Constants.FlickrParameterKeys.Extras: Constants.FlickrParameterValues.MediumURL]
@@ -40,12 +47,15 @@ class Client: NSObject {
         
         methodParameters.update(other: prefix as Dictionary<String, AnyObject>)
         methodParameters.update(other: searchType as Dictionary<String, AnyObject>)
+        methodParameters.update(other: accuracy as Dictionary<String,AnyObject>)
+        methodParameters.update(other: location as Dictionary<String, AnyObject>)
+        methodParameters.update(other: amount as Dictionary<String, AnyObject>)
         methodParameters.update(other: middle as Dictionary<String, AnyObject>)
         
         
         methodParameters.update(other: postfix as Dictionary<String, AnyObject>)
         
-        displayImageFromFlickrBySearch(methodParameters as [String : AnyObject])
+        displayImageFromFlickrBySearch(methodParameters as [String : AnyObject], completion: completion)
         
         
     }
@@ -55,7 +65,7 @@ class Client: NSObject {
     // MARK: Flickr API
     // type of search int is a pathrough variable from the search type button to the set parameters function here and back again
     // search int is to let the method know to find the random page or display the random image.
-    private func displayImageFromFlickrBySearch(_ methodParameters: [String: AnyObject]) {
+    private func displayImageFromFlickrBySearch(_ methodParameters: [String: AnyObject], completion: @escaping (_ result: AnyObject?, _ error: NSError?) -> Void){
         
         
         let session = URLSession.shared
@@ -107,6 +117,8 @@ class Client: NSObject {
                 } else {
                     displayError("Your request returned a status code other than 2xx! Response: \(code)")
                 }
+                let userInfo = [NSLocalizedDescriptionKey : "Bad HTTP Response code: '\(code)'"]
+                completion(nil, NSError(domain: "Getting photos from Flikr", code: 1, userInfo: userInfo))
                 return
             }
 
@@ -139,25 +151,46 @@ class Client: NSObject {
                 // check for photos and photo keys
             guard let photosDictionary = parsedResult[Constants.FlickrResponseKeys.Photos] as? [String:AnyObject], let photoArray = photosDictionary[Constants.FlickrResponseKeys.Photo] as? [[String:AnyObject]] else {
                     print("cannot find keys '\(Constants.FlickrResponseKeys.Photos)' and '\(Constants.FlickrResponseKeys.Photo)' in '\(parsedResult)'")
+                let userInfo = [NSLocalizedDescriptionKey : "cannot find keys '\(Constants.FlickrResponseKeys.Photos)' and '\(Constants.FlickrResponseKeys.Photo)' in '\(parsedResult)'"]
+                completion(nil, NSError(domain: "Getting photos from Flikr", code: 1, userInfo: userInfo))
                     return
                 }
             
-            print(photosDictionary)
-            
+
             // TODO: Save photos as binary data to core data in relation to pin. 
             
             
-            // random photo
-            let randomPhotoIndex = Int(arc4random_uniform(uint(photoArray.count)))
-            let photoDictionary = photoArray[randomPhotoIndex] as [String:AnyObject]
-            let photoTitle = photoDictionary[Constants.FlickrResponseKeys.Title] as? String
             
             // check for media key 'url_m' in photo
-            guard let imageURLString = photoDictionary[Constants.FlickrResponseKeys.MediumURL] as? String else {
-                print("cannot find key '\(Constants.FlickrResponseKeys.MediumURL)' in '\(parsedResult)'")
-                displayError("\(error)" )
-                return
+            for image in photoArray {
+                guard let imageURLString = image[Constants.FlickrResponseKeys.MediumURL] as? String else {
+                    print("cannot find key '\(Constants.FlickrResponseKeys.MediumURL)' in '\(parsedResult)'")
+                    displayError("\(error)" )
+                    return
+                }
+                if let url = NSURL(string: imageURLString) {
+                    if let data = NSData(contentsOf: url as URL) {
+                        
+                        let delegate = UIApplication.shared.delegate as? AppDelegate
+                        if let context = delegate?.persistentContainer.viewContext {
+                            var photo =  NSEntityDescription.insertNewObject(forEntityName: "Photo", into: context) as! Photo
+                            photo.photo = data
+                            photo.pin = PinDataSource.sharedInstance.pin
+                            PinDataSource.sharedInstance.photos.append(photo)
+                            do {
+                                try (context.save())
+                            } catch let err {
+                                print(err)
+                            }
+                        }
+
+                    } else {
+                        completion(nil, NSError(domain: "Could not get image data", code: 2, userInfo: nil))
+                    }
+                }
+                completion(PinDataSource.sharedInstance.photos as AnyObject, nil)
             }
+            
         }
         
         task.resume()

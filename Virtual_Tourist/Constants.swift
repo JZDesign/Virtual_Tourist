@@ -16,8 +16,8 @@ struct Constants {
         static let APIHost = "api.flickr.com"
         static let APIPath = "/services/rest"
         
-        static let SearchBBoxHalfWidth = 1.0
-        static let SearchBBoxHalfHeight = 1.0
+        static let SearchBBoxHalfWidth = 0.1
+        static let SearchBBoxHalfHeight = 0.1
         static let SearchLatRange = (-90.0, 90.0)
         static let SearchLonRange = (-180.0, 180.0)
     }
@@ -33,6 +33,9 @@ struct Constants {
         static let SafeSearch = "safe_search"
         static let Text = "text"
         static let BoundingBox = "bbox"
+        static let Accuracy = "accuracy"
+        static let Lat = "lat"
+        static let Lon = "lon"
         static let Page = "page"
     }
     

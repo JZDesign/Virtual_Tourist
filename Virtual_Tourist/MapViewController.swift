@@ -17,8 +17,6 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
     
     var pinAnnotationView:MKPinAnnotationView!
     var pointAnnotation:MKPointAnnotation!
-    
-    
     var annotation:MKAnnotation!
    
     var longRecognizer = UILongPressGestureRecognizer()
@@ -26,23 +24,26 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
     
     var pins = [Pin]()
 
-    
-    
     @IBOutlet var mapView: MKMapView!
     
     // location manager to find user location
     var locationManager = CLLocationManager()
 
     
+    
+    
+    // MARK: life cycle
+    
     override func viewWillAppear(_ animated: Bool) {
         self.view.addSubview(indicator)
-        indicator.hide()
+        
 
     }
     
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        
+        indicator.show()
         // load previously saved pins
         loadData()
         
@@ -53,20 +54,21 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
     
     }
 
+    
     // MARK: MAP VIEW
 
     
     func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
         let id = "pin"
+        // customize annotiations in map view
+        // set callout to false to allow interaction with annotation titles and callout left or right
         self.annotation = annotation
-        
         var pinview = mapView.dequeueReusableAnnotationView(withIdentifier: id) as? MKPinAnnotationView
         if pinview == nil {
             pinview = MKPinAnnotationView(annotation: annotation, reuseIdentifier: id)
             pinview!.canShowCallout = true
             pinview!.pinTintColor = .green
             pinview!.canShowCallout = false
-            //pinview!.rightCalloutAccessoryView = UIButton(type: .detailDisclosure)
             
         } else {
             pinview!.annotation = annotation
@@ -79,7 +81,21 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
     
     func mapView(_ mapView: MKMapView, didSelect view: MKAnnotationView) {
         //print(view.annotation?.coordinate)
-        Client.sharedInstance().setSearchParam(view.annotation?.coordinate.latitude as! Double, view.annotation?.coordinate.longitude as! Double)
+        
+        if let savedPins = fetchPins() {
+            for pin in savedPins {
+                pins.append(pin)
+                // display saved pins
+                
+                let lat = pin.latitude
+                let long = pin.longitude
+                if (view.annotation?.coordinate.latitude == lat) && (view.annotation?.coordinate.longitude == long) {
+                    PinDataSource.sharedInstance.pin = pin
+                }
+            }
+        }
+        performSegue(withIdentifier: "segue", sender: self)
+        
     }
     
     
@@ -133,17 +149,7 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
     
     
 
-    // MARK: get context for COREDATA
-    
-    func getContext() -> NSManagedObjectContext?  {
-        let delegate = UIApplication.shared.delegate as? AppDelegate
-        if let context = delegate?.persistentContainer.viewContext {
-            return context
-        }
-        print("no Context")
-        return nil
-    }
-
+    // MARK: Core Data functionality
     
     func loadData() {
         
@@ -164,6 +170,7 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
                 }
             }
         }
+        indicator.hide()
     }
 
     
