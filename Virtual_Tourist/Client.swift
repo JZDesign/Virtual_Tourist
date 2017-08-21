@@ -30,7 +30,7 @@ class Client: NSObject {
         return "0,0,0,0"
     }
     
-    func setSearchParam(_ latitude: Double, _ longitude: Double, completion: @escaping (_ result: AnyObject?, _ error: NSError?) -> Void) {
+    func setSearchParam(_ latitude: Double, _ longitude: Double, completion: @escaping (_ result: [NSURL]?, _ error: NSError?) -> Void) {
         
         var methodParameters: [String:AnyObject] = [:]
         
@@ -65,7 +65,7 @@ class Client: NSObject {
     // MARK: Flickr API
     // type of search int is a pathrough variable from the search type button to the set parameters function here and back again
     // search int is to let the method know to find the random page or display the random image.
-    private func displayImageFromFlickrBySearch(_ methodParameters: [String: AnyObject], completion: @escaping (_ result: AnyObject?, _ error: NSError?) -> Void){
+    private func displayImageFromFlickrBySearch(_ methodParameters: [String: AnyObject], completion: @escaping (_ result: [NSURL]?, _ error: NSError?) -> Void){
         
         
         let session = URLSession.shared
@@ -159,8 +159,8 @@ class Client: NSObject {
 
             // TODO: Save photos as binary data to core data in relation to pin. 
             
-            
-            
+            var urls = [NSURL]()
+            PinDataSource.sharedInstance.photos = []
             // check for media key 'url_m' in photo
             for image in photoArray {
                 guard let imageURLString = image[Constants.FlickrResponseKeys.MediumURL] as? String else {
@@ -169,7 +169,10 @@ class Client: NSObject {
                     return
                 }
                 if let url = NSURL(string: imageURLString) {
+                    urls.append(url)
+                    /*
                     if let data = NSData(contentsOf: url as URL) {
+                        
                         
                         let delegate = UIApplication.shared.delegate as? AppDelegate
                         if let context = delegate?.persistentContainer.viewContext {
@@ -177,8 +180,10 @@ class Client: NSObject {
                             photo.photo = data
                             photo.pin = PinDataSource.sharedInstance.pin
                             PinDataSource.sharedInstance.photos.append(photo)
+                            //var center = NotificationCenter.default
+                            //center.post(NSNotification(name: NSNotification.Name(rawValue: "Photos"), object: nil) as Notification)
                             do {
-                                try (context.save())
+                            try (context.save())
                             } catch let err {
                                 print(err)
                             }
@@ -186,9 +191,9 @@ class Client: NSObject {
 
                     } else {
                         completion(nil, NSError(domain: "Could not get image data", code: 2, userInfo: nil))
-                    }
+                    } */
                 }
-                completion(PinDataSource.sharedInstance.photos as AnyObject, nil)
+                completion(urls, nil)
             }
             
         }

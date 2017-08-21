@@ -10,5 +10,15 @@ import UIKit
 
 class CollectionViewCell: UICollectionViewCell {
     @IBOutlet var imageview: UIImageView!
+    var activityIndicator = ActivityIndicator(text:"")
     
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        self.addSubview(activityIndicator)
+        if imageview.image == nil {
+            activityIndicator.show()
+        } else {
+            activityIndicator.hide()
+        }
+    }
 }
