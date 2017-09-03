@@ -2,7 +2,7 @@
 //  Pin+CoreDataProperties.swift
 //  Virtual_Tourist
 //
-//  Created by JacobRakidzich on 8/6/17.
+//  Created by JacobRakidzich on 8/21/17.
 //  Copyright © 2017 Jacob Rakidzich. All rights reserved.
 //
 

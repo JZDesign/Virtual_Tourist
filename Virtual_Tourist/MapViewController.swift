@@ -13,46 +13,57 @@ import CoreData
 
 class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDelegate, UIGestureRecognizerDelegate {
 
-    let indicator = ActivityIndicator(text:"Loading")
     
+    // Pin
     var pinAnnotationView:MKPinAnnotationView!
     var pointAnnotation:MKPointAnnotation!
     var annotation:MKAnnotation!
-   
+    // Gesture
     var longRecognizer = UILongPressGestureRecognizer()
-    
-    
-    var pins = [Pin]()
-
-    @IBOutlet var mapView: MKMapView!
-    
     // location manager to find user location
     var locationManager = CLLocationManager()
+    // pin holder
+    var pins = [Pin]()
 
+    
+    
+    // OUTLETS
+    @IBOutlet var mapView: MKMapView!
+    
     
     
     
     // MARK: life cycle
     
-    override func viewWillAppear(_ animated: Bool) {
-        self.view.addSubview(indicator)
-        
 
-    }
-    
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        indicator.show()
+
         // load previously saved pins
-        loadData()
+        if let savedPins = loadManagedObject(entityName: "Pin", withPredicate: nil) {
+            for item in savedPins {
+                let pin = item as! Pin
+                pins.append(pin)
+                // display saved pins
+                
+                let lat = CLLocationDegrees(pin.latitude)
+                let long = CLLocationDegrees(pin.longitude)
+                // The lat and long are used to create a CLLocationCoordinates2D instance.
+                let coordinate = CLLocationCoordinate2D(latitude: lat, longitude: long)
+                var annotation = MKPointAnnotation()
+                annotation.coordinate = coordinate
+                self.mapView.addAnnotation(annotation)
+            }
+
+        }
         
         // init long gesture recognizer
         longRecognizer = UILongPressGestureRecognizer(target: self, action: #selector(self.longGesture(sender:)))
         longRecognizer.delegate = self
         mapView.addGestureRecognizer(longRecognizer)
-    
+
     }
+    
 
     
     // MARK: MAP VIEW
@@ -80,29 +91,22 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
     
     
     func mapView(_ mapView: MKMapView, didSelect view: MKAnnotationView) {
-        //print(view.annotation?.coordinate)
-        
-        if let savedPins = fetchPins() {
-            for pin in savedPins {
-                pins.append(pin)
-                // display saved pins
-                
-                let lat = pin.latitude
-                let long = pin.longitude
-                if (view.annotation?.coordinate.latitude == lat) && (view.annotation?.coordinate.longitude == long) {
-                    PinDataSource.sharedInstance.pin = pin
-                }
+       
+        for pin in pins {
+            // display saved pins
+            let lat = pin.latitude
+            let long = pin.longitude
+            if (view.annotation?.coordinate.latitude == lat) && (view.annotation?.coordinate.longitude == long) {
+                PinDataSource.sharedInstance.pin = pin
             }
         }
+        
         performSegue(withIdentifier: "segue", sender: self)
         
     }
     
     
-    func mapView(mapView: MKMapView, didDeselectAnnotationView view: MKAnnotationView) {
-        view.removeGestureRecognizer(view.gestureRecognizers!.first!)
-    }
-       
+   
     
     // remove current pins
     
@@ -126,18 +130,14 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
             // save pin to core data
             let lat = annotation?.coordinate.latitude as! Double
             let lon = annotation?.coordinate.longitude as! Double
-            
-            if let context = getContext() {
-                var pin =  NSEntityDescription.insertNewObject(forEntityName: "Pin", into: context) as! Pin
-                pin.latitude = lat
-                pin.longitude = lon
-                pins.append(pin)
-                do {
-                    try (context.save())
-                } catch let err {
-                    print(err)
-                }
+            do {
+                let newPin = Pin(latitude: lat, longitude: lon, context: stack().context)
+                try stack().saveContext()
+                pins.append(newPin)
+            } catch {
+                print("Save pins failed")
             }
+            
             
             // display pins
             mapView.addAnnotation(self.annotation)
@@ -147,43 +147,5 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
     }
     
     
-    
-
-    // MARK: Core Data functionality
-    
-    func loadData() {
-        
-        if let context = getContext() {
-            
-            if let savedPins = fetchPins() {
-                for pin in savedPins {
-                    pins.append(pin)
-                    // display saved pins
-                    
-                    let lat = CLLocationDegrees(pin.latitude)
-                    let long = CLLocationDegrees(pin.longitude)
-                    // The lat and long are used to create a CLLocationCoordinates2D instance.
-                    let coordinate = CLLocationCoordinate2D(latitude: lat, longitude: long)
-                    var annotation = MKPointAnnotation()
-                    annotation.coordinate = coordinate
-                    self.mapView.addAnnotation(annotation)
-                }
-            }
-        }
-        indicator.hide()
-    }
-
-    
-    private func fetchPins() -> [Pin]? {
-        if let context = getContext() {
-            let request = NSFetchRequest<NSManagedObject>(entityName: "Pin")
-            do {
-                return try context.fetch(request) as? [Pin]
-            } catch let err {
-                print(err)
-            }
-        }
-        return nil
-    }
-
+   
 }

@@ -37,7 +37,7 @@ class Client: NSObject {
         let searchType = [Constants.FlickrParameterKeys.BoundingBox: bboxString(latitude,longitude)]
         let accuracy = [Constants.FlickrParameterKeys.Accuracy: 11]
         let location = [Constants.FlickrParameterKeys.Lat : latitude, Constants.FlickrParameterKeys.Lon : longitude]
-        let amount = ["page": 1, "per_page": 100, "sort": ""] as [String : Any]
+        let amount = ["page": 1, "per_page": 50, "sort": ""] as [String : Any]
         let prefix = [Constants.FlickrParameterKeys.Method: Constants.FlickrParameterValues.SearchMethod,
                       Constants.FlickrParameterKeys.APIKey: Constants.FlickrParameterValues.APIKey]
         let middle = [Constants.FlickrParameterKeys.Extras: Constants.FlickrParameterValues.MediumURL]
@@ -157,7 +157,6 @@ class Client: NSObject {
                 }
             
 
-            // TODO: Save photos as binary data to core data in relation to pin. 
             
             var urls = [NSURL]()
             PinDataSource.sharedInstance.photos = []
@@ -170,37 +169,66 @@ class Client: NSObject {
                 }
                 if let url = NSURL(string: imageURLString) {
                     urls.append(url)
-                    /*
-                    if let data = NSData(contentsOf: url as URL) {
-                        
-                        
-                        let delegate = UIApplication.shared.delegate as? AppDelegate
-                        if let context = delegate?.persistentContainer.viewContext {
-                            var photo =  NSEntityDescription.insertNewObject(forEntityName: "Photo", into: context) as! Photo
-                            photo.photo = data
-                            photo.pin = PinDataSource.sharedInstance.pin
-                            PinDataSource.sharedInstance.photos.append(photo)
-                            //var center = NotificationCenter.default
-                            //center.post(NSNotification(name: NSNotification.Name(rawValue: "Photos"), object: nil) as Notification)
-                            do {
-                            try (context.save())
-                            } catch let err {
-                                print(err)
-                            }
-                        }
-
-                    } else {
-                        completion(nil, NSError(domain: "Could not get image data", code: 2, userInfo: nil))
-                    } */
                 }
-                completion(urls, nil)
             }
-            
+            completion(self.rndImg(urls: urls), nil)
+
         }
         
         task.resume()
     }
 
+    
+    // MARK: DoPhotodownload
+    
+    func doPhotoDownload(request: URLRequest, completion: @escaping(_ completed: Bool, _ error: NSError?)-> Void)  {
+        let task = URLSession.shared.downloadTask(with: request, completionHandler: { url, response, error in
+            if let error = error {
+                completion(false, error as NSError)
+            } else {
+                let data = try! Data(contentsOf: url!)
+                let delegate = UIApplication.shared.delegate as? AppDelegate
+                if let context = delegate?.stack.context {
+                    let photo =  NSEntityDescription.insertNewObject(forEntityName: "Photo", into: context) as! Photo
+                    photo.photo = data as NSData
+                    photo.pin = PinDataSource.sharedInstance.pin
+                    PinDataSource.sharedInstance.photos.append(photo)
+                    do {
+                        try (context.save())
+                        completion(true, nil)
+                    } catch let err {
+                        print(err)
+                    }
+                } 
+            }
+            
+            print("photo downloaded")
+            
+        })
+        task.resume()
+
+    }
+    
+    // MARK: Randomize results
+    
+    func rndImg(urls: [NSURL]) -> [NSURL] {
+        var result: [NSURL] = []
+        if urls.count >= 30 {
+            var rnd:[Int] = []
+            while rnd.count < 30 {
+                
+                let random = arc4random_uniform(UInt32(urls.count))
+                if !rnd.contains(Int(random)) { rnd.append(Int(random)) }
+            }
+            for item in rnd {
+                
+                result.append(urls[item])
+            }
+            return result
+        } else {
+            return urls
+        }
+    }
     
     
     // MARK: Helper for Creating a URL from Parameters

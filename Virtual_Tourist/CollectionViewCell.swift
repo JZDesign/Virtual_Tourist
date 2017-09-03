@@ -10,15 +10,31 @@ import UIKit
 
 class CollectionViewCell: UICollectionViewCell {
     @IBOutlet var imageview: UIImageView!
-    var activityIndicator = ActivityIndicator(text:"")
+    @IBOutlet var activityIndicator: UIActivityIndicatorView!
     
     override func prepareForReuse() {
         super.prepareForReuse()
-        self.addSubview(activityIndicator)
-        if imageview.image == nil {
-            activityIndicator.show()
-        } else {
-            activityIndicator.hide()
+    }
+    
+    func initWithURL(_ url: NSURL) {
+        
+        let request = URLRequest(url: URL(string: url.absoluteString!)!)
+        Client.sharedInstance().doPhotoDownload(request: request, completion: { (completed, error) in
+            if completed {
+                
+            } else {
+                print(error)
+            }
+        }) // end doPhotoDownload()
+        
+    }
+    
+    func initWithData(_ data: Data?) {
+        if let image = UIImage(data: data!) {
+            self.imageview.image = image
+            self.activityIndicator.stopAnimating()
+            self.activityIndicator.hidesWhenStopped = true
         }
     }
+
 }

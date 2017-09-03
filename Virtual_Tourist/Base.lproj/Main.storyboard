@@ -42,7 +42,7 @@
                     </navigationItem>
                     <connections>
                         <outlet property="mapView" destination="lRS-HL-rvw" id="bfG-29-pdZ"/>
-                        <segue destination="ZSX-It-W7I" kind="presentation" identifier="segue" id="RbL-SE-WPK"/>
+                        <segue destination="yyR-8N-EhK" kind="show" identifier="segue" id="Kt6-sF-QUx"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
@@ -90,16 +90,24 @@
                                                 <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Apu-WV-00f">
                                                     <rect key="frame" x="0.0" y="0.0" width="80" height="90"/>
                                                 </imageView>
+                                                <activityIndicatorView opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" style="gray" translatesAutoresizingMaskIntoConstraints="NO" id="b57-Zj-Oe6">
+                                                    <rect key="frame" x="8" y="8" width="84" height="84"/>
+                                                </activityIndicatorView>
                                             </subviews>
                                         </view>
                                         <constraints>
                                             <constraint firstItem="Apu-WV-00f" firstAttribute="top" secondItem="gmU-Z6-bF1" secondAttribute="top" id="E7H-dJ-Nxh"/>
+                                            <constraint firstItem="b57-Zj-Oe6" firstAttribute="leading" secondItem="gmU-Z6-bF1" secondAttribute="leadingMargin" id="Khg-Oz-1Xd"/>
+                                            <constraint firstItem="b57-Zj-Oe6" firstAttribute="top" secondItem="gmU-Z6-bF1" secondAttribute="topMargin" id="Vxq-gN-1Ad"/>
+                                            <constraint firstAttribute="bottomMargin" secondItem="b57-Zj-Oe6" secondAttribute="bottom" id="ZSg-lH-CVr"/>
+                                            <constraint firstAttribute="trailingMargin" secondItem="b57-Zj-Oe6" secondAttribute="trailing" id="agy-Lq-QKB"/>
                                             <constraint firstItem="Apu-WV-00f" firstAttribute="leading" secondItem="gmU-Z6-bF1" secondAttribute="leading" id="d0M-fk-qB9"/>
                                             <constraint firstAttribute="trailing" secondItem="Apu-WV-00f" secondAttribute="trailing" id="mHH-Wc-Gjz"/>
                                             <constraint firstAttribute="bottom" secondItem="Apu-WV-00f" secondAttribute="bottom" id="rxo-20-D4o"/>
                                         </constraints>
                                         <size key="customSize" width="100" height="100"/>
                                         <connections>
+                                            <outlet property="activityIndicator" destination="b57-Zj-Oe6" id="g4k-iV-8l8"/>
                                             <outlet property="imageview" destination="Apu-WV-00f" id="J7l-lL-Gbu"/>
                                         </connections>
                                     </collectionViewCell>
@@ -121,20 +129,13 @@
                             <constraint firstItem="PxB-i7-AhU" firstAttribute="trailing" secondItem="DmN-Ni-QiX" secondAttribute="trailingMargin" id="lYc-Rj-aSE"/>
                         </constraints>
                     </view>
-                    <navigationItem key="navigationItem" id="GLp-DM-T91">
-                        <barButtonItem key="leftBarButtonItem" systemItem="done" id="nLI-Ih-hQb">
-                            <connections>
-                                <action selector="doDoneButton:" destination="yyR-8N-EhK" id="Ihn-1V-U3G"/>
-                            </connections>
-                        </barButtonItem>
-                    </navigationItem>
                     <connections>
                         <outlet property="collectionView" destination="PxB-i7-AhU" id="haD-9u-M42"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Zoc-cZ-LTt" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="3687.1999999999998" y="129.98500749625188"/>
+            <point key="canvasLocation" x="2130" y="123"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="pU1-Nl-a7E">
@@ -153,24 +154,6 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Uku-OW-cZN" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="210" y="123"/>
-        </scene>
-        <!--Navigation Controller-->
-        <scene sceneID="VsT-0S-7l8">
-            <objects>
-                <navigationController automaticallyAdjustsScrollViewInsets="NO" id="ZSX-It-W7I" sceneMemberID="viewController">
-                    <toolbarItems/>
-                    <navigationBar key="navigationBar" contentMode="scaleToFill" id="AN4-c9-it0">
-                        <rect key="frame" x="0.0" y="0.0" width="375" height="44"/>
-                        <autoresizingMask key="autoresizingMask"/>
-                    </navigationBar>
-                    <nil name="viewControllers"/>
-                    <connections>
-                        <segue destination="yyR-8N-EhK" kind="relationship" relationship="rootViewController" id="hYX-F8-cpC"/>
-                    </connections>
-                </navigationController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="EMD-rO-YrB" userLabel="First Responder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="2748" y="129.98500749625188"/>
         </scene>
     </scenes>
 </document>

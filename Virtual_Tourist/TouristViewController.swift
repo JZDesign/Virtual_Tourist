@@ -12,16 +12,12 @@ import CoreData
 
 class TouristViewController: UIViewController, MKMapViewDelegate, UICollectionViewDelegate, UICollectionViewDataSource {
     
-    
-    
-    
-    
+
     
     @IBOutlet var collectionView: UICollectionView!
     let cellID = "cellID"
     let touringPin = PinDataSource.sharedInstance.pin
-    
-    
+    var totalCount = 0
     
     // MARK: LifeCycle
     override func viewWillAppear(_ animated: Bool) {
@@ -31,56 +27,39 @@ class TouristViewController: UIViewController, MKMapViewDelegate, UICollectionVi
     
     override func viewDidLoad() {
         super.viewDidLoad()
-
-        PinDataSource.sharedInstance.photos = []
-        
+        self.navigationController?.navigationBar.backItem?.backBarButtonItem?.title = "Done"
+        self.navigationItem.backBarButtonItem?.style = UIBarButtonItemStyle.done
         // check for data in core data, if available set cell data
         // if unavailable pull from Flikr, save, then display.
-        if let count = PinDataSource.sharedInstance.pin.photos?.count {
+        if let count = touringPin.photos?.count {
             if count == 0 {
                 Client.sharedInstance().setSearchParam(touringPin.latitude as! Double, touringPin.longitude as! Double, completion: { (result, error) in
                     if error != nil {
                         print(error)
                     } else {
-                        print(result)
+                        self.totalCount = (result?.count)!
+                        PinDataSource.sharedInstance.urls = result!
                         for url in (result?.enumerated())! {
                             let request = URLRequest(url: URL(string: url.element.absoluteString!)!)
-                            let task = URLSession.shared.downloadTask(with: request, completionHandler: { url, response, error in
-                                if let error = error {
-                                    print(error)
+                            Client.sharedInstance().doPhotoDownload(request: request, completion: { (completed, error) in
+                                if completed {
+                                    DispatchQueue.main.async {
+                                        self.collectionView.reloadData()
+                                    }
                                 } else {
-                                    let data = try! Data(contentsOf: url!)
-                                    let delegate = UIApplication.shared.delegate as? AppDelegate
-                                    if let context = delegate?.persistentContainer.viewContext {
-                                        let photo =  NSEntityDescription.insertNewObject(forEntityName: "Photo", into: context) as! Photo
-                                        photo.photo = data as NSData
-                                        photo.pin = PinDataSource.sharedInstance.pin
-                                        PinDataSource.sharedInstance.photos.append(photo)
-                                        do {
-                                            try (context.save())
-                                            DispatchQueue.main.async {
-                                                self.collectionView.reloadData()
-                                            }
-                                        } catch let err {
-                                            print(err)
-                                        }
-                                    }
-
-                                    }
-                                    print("photo downloaded")
-                                
-                            }) 
-                            task.resume()
-                            
-                        }
+                                    print(error)
+                                }
+                            }) // end doPhotoDownload()
+                        } // end for statement
                         self.collectionView.reloadData()
-                    }
-                })
+                    } // end if error ELSE
+                }) // end setSearchParam()
             } else {
-                loadData()
+                totalCount = count
+                LoadPhotos()
             }
-        }
-    }
+        } // end if let count = touringPin.photos count
+    } // end view did load
 
 
 
@@ -90,24 +69,20 @@ class TouristViewController: UIViewController, MKMapViewDelegate, UICollectionVi
     
 
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        if let count = PinDataSource.sharedInstance.pin.photos?.count {
+        let count = PinDataSource.sharedInstance.photos.count
+        if count > 0 {
             return count
         }
         return 0
+        //return totalCount
     }
     
     
     // The cell that is returned must be retrieved from a call to -dequeueReusableCellWithReuseIdentifier:forIndexPath:
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: cellID, for: indexPath) as! CollectionViewCell
-        cell.backgroundColor = .lightGray
-        let ai = ActivityIndicator(text:"")
-        cell.addSubview(ai)
-        ai.show()
-        if let image = UIImage(data: PinDataSource.sharedInstance.photos[indexPath.row].photo as! Data) {
-            cell.imageview.image = image
-            ai.hide()
-        }
+        cell.activityIndicator.startAnimating()
+        cell.initWithData(PinDataSource.sharedInstance.photos[indexPath.row].photo as! Data)
         return cell
     }
     
@@ -118,37 +93,21 @@ class TouristViewController: UIViewController, MKMapViewDelegate, UICollectionVi
 
     // MARK: Core Data
     
-    func loadData() {
-        if let context = getContext() {
-            PinDataSource.sharedInstance.photos = []
-            if let savedPhotos = fetchPotos() {
-                for pic in savedPhotos {
-                    // display saved pics
-                    PinDataSource.sharedInstance.photos.append(pic)
-                }
+    func LoadPhotos() {
+        PinDataSource.sharedInstance.photos = []
+        if let savedPhotos = loadManagedObject(entityName: "Photo", withPredicate: NSPredicate(format: "pin = %@", argumentArray: [touringPin])) {
+            for item in savedPhotos {
+                let photo = item as! Photo
+                PinDataSource.sharedInstance.photos.append(photo)
             }
         }
-    }
-
-    private func fetchPotos() -> [Photo]? {
-        if let context = getContext() {
-            let request = NSFetchRequest<NSManagedObject>(entityName: "Photo")
-            do {
-                return try context.fetch(request) as? [Photo]
-            } catch let err {
-                print(err)
-            }
-        }
-        return nil
-    }
-
+        self.collectionView.reloadData()
 
     
-    // MARK: Actions
-
-    @IBAction func doDoneButton(_ sender: Any) {
-        self.dismiss(animated: true, completion: nil)
     }
     
+   
+    
+   
     
 }
