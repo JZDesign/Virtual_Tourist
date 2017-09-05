@@ -181,7 +181,7 @@ class Client: NSObject {
     
     // MARK: DoPhotodownload
     
-    func doPhotoDownload(request: URLRequest, completion: @escaping(_ completed: Bool, _ error: NSError?)-> Void)  {
+    func doPhotoDownload(request: URLRequest, photo: Photo, completion: @escaping(_ completed: Bool, _ error: NSError?)-> Void)  {
         let task = URLSession.shared.downloadTask(with: request, completionHandler: { url, response, error in
             if let error = error {
                 completion(false, error as NSError)
@@ -189,7 +189,7 @@ class Client: NSObject {
                 let data = try! Data(contentsOf: url!)
                 let delegate = UIApplication.shared.delegate as? AppDelegate
                 if let context = delegate?.stack.context {
-                    let photo =  NSEntityDescription.insertNewObject(forEntityName: "Photo", into: context) as! Photo
+                    
                     photo.photo = data as NSData
                     photo.pin = PinDataSource.sharedInstance.pin
                     PinDataSource.sharedInstance.photos.append(photo)

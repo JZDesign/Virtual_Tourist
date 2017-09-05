@@ -17,6 +17,7 @@ class TouristViewController: UIViewController, MKMapViewDelegate, UICollectionVi
     @IBOutlet var collectionView: UICollectionView!
     let cellID = "cellID"
     let touringPin = PinDataSource.sharedInstance.pin
+    // placeholder for cell count... may not use
     var totalCount = 0
     
     // MARK: LifeCycle
@@ -37,19 +38,23 @@ class TouristViewController: UIViewController, MKMapViewDelegate, UICollectionVi
                     if error != nil {
                         print(error)
                     } else {
-                        self.totalCount = (result?.count)!
-                        PinDataSource.sharedInstance.urls = result!
+                        
                         for url in (result?.enumerated())! {
-                            let request = URLRequest(url: URL(string: url.element.absoluteString!)!)
-                            Client.sharedInstance().doPhotoDownload(request: request, completion: { (completed, error) in
-                                if completed {
-                                    DispatchQueue.main.async {
-                                        self.collectionView.reloadData()
-                                    }
-                                } else {
-                                    print(error)
-                                }
-                            }) // end doPhotoDownload()
+                            
+                        
+                            let photo = NSEntityDescription.insertNewObject(forEntityName: "Photo", into: self.stack().context) as! Photo
+                            photo.url = url.element.absoluteString
+                            photo.pin = PinDataSource.sharedInstance.pin
+                            do {
+                                try (self.stack().context.save())
+                            } catch let err {
+                                print(err)
+                            }
+                        
+                            DispatchQueue.main.async {
+                                self.collectionView.reloadData()
+                            }
+                            
                         } // end for statement
                         self.collectionView.reloadData()
                     } // end if error ELSE
@@ -82,7 +87,7 @@ class TouristViewController: UIViewController, MKMapViewDelegate, UICollectionVi
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: cellID, for: indexPath) as! CollectionViewCell
         cell.activityIndicator.startAnimating()
-        cell.initWithData(PinDataSource.sharedInstance.photos[indexPath.row].photo as! Data)
+        cell.initWithPhoto(PinDataSource.sharedInstance.photos[indexPath.row])
         return cell
     }
     

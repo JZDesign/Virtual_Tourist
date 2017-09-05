@@ -2,7 +2,7 @@
 //  Photo+CoreDataProperties.swift
 //  Virtual_Tourist
 //
-//  Created by JacobRakidzich on 8/21/17.
+//  Created by JacobRakidzich on 9/3/17.
 //  Copyright © 2017 Jacob Rakidzich. All rights reserved.
 //
 
@@ -17,6 +17,7 @@ extension Photo {
     }
 
     @NSManaged public var photo: NSData?
+    @NSManaged public var url: String?
     @NSManaged public var pin: Pin?
 
 }

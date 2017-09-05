@@ -2,7 +2,7 @@
 //  Pin+CoreDataClass.swift
 //  Virtual_Tourist
 //
-//  Created by JacobRakidzich on 8/21/17.
+//  Created by JacobRakidzich on 9/3/17.
 //  Copyright © 2017 Jacob Rakidzich. All rights reserved.
 //
 
@@ -12,6 +12,8 @@ import CoreData
 @objc(Pin)
 public class Pin: NSManagedObject {
 
+    
+    
     convenience init(latitude: Double, longitude: Double, context: NSManagedObjectContext) {
         if let entity = NSEntityDescription.entity(forEntityName: "Pin", in: context) {
             self.init(entity: entity, insertInto: context)
@@ -21,6 +23,6 @@ public class Pin: NSManagedObject {
             fatalError("Unable To Find Entity Name!")
         }
     }
-
+    
     
 }
