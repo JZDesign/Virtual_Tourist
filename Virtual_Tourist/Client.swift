@@ -188,11 +188,11 @@ class Client: NSObject {
             } else {
                 let data = try! Data(contentsOf: url!)
                 let delegate = UIApplication.shared.delegate as? AppDelegate
-                if let context = delegate?.stack.context {
+                if let context = delegate?.stack.privateContext {
                     
                     photo.photo = data as NSData
                     photo.pin = PinDataSource.sharedInstance.pin
-                    PinDataSource.sharedInstance.photos.append(photo)
+                    
                     do {
                         try (context.save())
                         completion(true, nil)

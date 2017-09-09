@@ -22,51 +22,35 @@ class CollectionViewCell: UICollectionViewCell {
     func initWithPhoto(_ photo: Photo) {
         self.activityIndicator.hidesWhenStopped = true
         if photo.photo != nil {
-            self.imageview.image = UIImage(data: photo.photo as! Data)
             DispatchQueue.main.async {
+                self.imageview.image = UIImage(data: photo.photo! as Data)
                 self.activityIndicator.stopAnimating()
             }
         } else {
-            self.initWithURL(photo, completion: { (completion, error) in
-                if completion {
-                    self.initWithData(photo.photo as! Data, completion: { (completed, error) in
-                        if completed {
-                            DispatchQueue.main.async {
-                                self.activityIndicator.stopAnimating()
-                            }
-                        } else {
-                            print(error?.localizedDescription)
-                        }
-                    })
-                } else {
-                    print(error?.localizedDescription)
-                }
-            })
+            // do photo Download
+            downloadPhoto(photo: photo)
         }
     }
     
-    func initWithURL(_ photo: Photo, completion: @escaping(_ completed: Bool, _ error: NSError?)-> Void) {
-        
+   
+    func downloadPhoto(photo: Photo) {
         let request = URLRequest(url: URL(string: photo.url!)!)
         Client.sharedInstance().doPhotoDownload(request: request, photo: photo, completion: { (completed, error) in
             if completed {
-                completion(true, nil)
-            } else {
-                completion(false,error)
+                if let image = UIImage(data: photo.photo! as Data) {
+                    DispatchQueue.main.async {
+                        self.imageview.image = image
+                        self.activityIndicator.stopAnimating()
+                    }
+                } else {
+                    print("Could not get image from data")
+                }
+            } else { // not completed
+                print(error?.localizedDescription ?? "ERROR! Could not doPhotoDownload")
+
             }
         }) // end doPhotoDownload()
         
     }
     
-    func initWithData(_ data: Data?, completion: @escaping(_ completed: Bool, _ error: NSError?)-> Void) {
-        if let image = UIImage(data: data!) {
-            DispatchQueue.main.async {
-                self.imageview.image = image
-            }
-            completion(true, nil)
-        } else {
-            completion(false, NSError(domain: "initWithData", code: 1, userInfo: nil))
-        }
-    }
-
 }

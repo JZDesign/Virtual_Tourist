@@ -13,25 +13,24 @@ import CoreData
 class TouristViewController: UIViewController, MKMapViewDelegate, UICollectionViewDelegate, UICollectionViewDataSource {
     
 
-    
+    // MARK: Outlets
     @IBOutlet var mapView: MKMapView!
     @IBOutlet var collectionView: UICollectionView!
+    
+    // MARK: Properties
+    // reuseID
     let cellID = "cellID"
+    // active Pin Annotation
     let touringPin = PinDataSource.sharedInstance.pin
-    // placeholder for cell count... may not use
-    var totalCount = 0
+    
+    
     
     // MARK: LifeCycle
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(true)
-        
-    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
         // reset data
-        PinDataSource.sharedInstance.photos = []
-        PinDataSource.sharedInstance.urls = []
+        resetData()
         
         // add pin
         let annotation = MKPointAnnotation()
@@ -39,47 +38,22 @@ class TouristViewController: UIViewController, MKMapViewDelegate, UICollectionVi
         self.mapView.addAnnotation(annotation)
         self.mapView.centerCoordinate = annotation.coordinate
         
-        
-        
         // check for data in core data, if available set cell data
         // if unavailable pull from Flikr, save, then display.
         
-        // TODO: move download to an action and call the action
         if let count = touringPin.photos?.count {
             if count == 0 {
-                Client.sharedInstance().setSearchParam(touringPin.latitude as! Double, touringPin.longitude as! Double, completion: { (result, error) in
-                    if error != nil {
-                        print(error)
-                    } else {
-                        
-                        for url in (result?.enumerated())! {
-                            
-                        
-                            let photo = NSEntityDescription.insertNewObject(forEntityName: "Photo", into: self.stack().context) as! Photo
-                            photo.url = url.element.absoluteString
-                            photo.pin = PinDataSource.sharedInstance.pin
-                            do {
-                                try (self.stack().context.save())
-                            } catch let err {
-                                print(err)
-                            }
-                        
-                            DispatchQueue.main.async {
-                                self.collectionView.reloadData()
-                            }
-                            
-                        } // end for statement
-                        self.collectionView.reloadData()
-                    } // end if error ELSE
-                }) // end setSearchParam()
+                doNewPhotosButton(self)
+                
             } else {
-                totalCount = count
                 LoadPhotos()
             }
         } // end if let count = touringPin.photos count
     } // end view did load
 
 
+    
+    
 
     // MARK: MapView
     
@@ -95,16 +69,10 @@ class TouristViewController: UIViewController, MKMapViewDelegate, UICollectionVi
     
 
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        let count = PinDataSource.sharedInstance.photos.count
-        if count > 0 {
-            return count
-        }
-        return 0
-        //return totalCount
+        return PinDataSource.sharedInstance.photos.count
     }
     
     
-    // The cell that is returned must be retrieved from a call to -dequeueReusableCellWithReuseIdentifier:forIndexPath:
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: cellID, for: indexPath) as! CollectionViewCell
         cell.activityIndicator.startAnimating()
@@ -116,6 +84,12 @@ class TouristViewController: UIViewController, MKMapViewDelegate, UICollectionVi
         // TODO: Delete cells and the core data attached to them
     }
 
+    
+    func reloadCollectionView() {
+        DispatchQueue.main.async {
+            self.collectionView.reloadData()
+        }
+    }
 
     // MARK: Core Data
     
@@ -132,10 +106,52 @@ class TouristViewController: UIViewController, MKMapViewDelegate, UICollectionVi
     
     }
     
-   
-    @IBAction func doNewPhotosButton(_ sender: Any) {
+    func deletePhotosWithCompletion(completion: @escaping (_ completed: Bool) -> Void) {
+        for item in PinDataSource.sharedInstance.photos {
+            stack().privateContext.delete(item)
+        }
+        resetData()
+        
+        self.reloadCollectionView()
+        completion(true)
+
     }
     
+    
+    // MARK: Actions
+   
+    @IBAction func doNewPhotosButton(_ sender: Any) {
+        // empty PinDataSource properties and delete existing data
+        deletePhotosWithCompletion { (completed) in
+            if completed {
+                // doDownload
+                Client.sharedInstance().setSearchParam(self.touringPin.latitude as! Double, self.touringPin.longitude as! Double, completion: { (result, error) in
+                    if error != nil {
+                        print(error)
+                    } else {
+                        for url in (result?.enumerated())! {
+                            // create photo managed object and persist
+                            let photo = NSEntityDescription.insertNewObject(forEntityName: "Photo", into: self.stack().privateContext) as! Photo
+                            photo.url = url.element.absoluteString
+                            photo.pin = PinDataSource.sharedInstance.pin
+                            // add photo to datasource for use in the collection view.
+                            PinDataSource.sharedInstance.photos.append(photo)
+                            do {
+                                try (self.stack().privateContext.save())
+                            } catch let err {
+                                print(err)
+                            }
+                            self.reloadCollectionView()
+                        } // end for statement
+                        self.reloadCollectionView()
+                    } // end if error ELSE
+                }) // end setSearchParam()
+            } // end Completed
+        } // end deletePhotosWithCompletion
+    }
+        
+        
+        
    
     
 }

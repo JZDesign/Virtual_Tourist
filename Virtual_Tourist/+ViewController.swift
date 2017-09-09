@@ -32,7 +32,7 @@ extension UIViewController {
         if withPredicate != nil {
             fetchRequest.predicate = withPredicate
         }
-        return NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: stack().context, sectionNameKeyPath: nil, cacheName: nil)
+        return NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: stack().privateContext, sectionNameKeyPath: nil, cacheName: nil)
     }
     
     
@@ -57,6 +57,11 @@ extension UIViewController {
         
     }
     
+    // MARK: Reset Data
+    
+    func resetData() {
+        PinDataSource.sharedInstance.photos.removeAll()
+    }
     
     
 }

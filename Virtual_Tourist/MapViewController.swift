@@ -124,10 +124,8 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
             self.annotation = pinAnnotation
         
             // save pin to core data
-            let lat = annotation?.coordinate.latitude as! Double
-            let lon = annotation?.coordinate.longitude as! Double
             do {
-                let newPin = Pin(latitude: lat, longitude: lon, context: stack().context)
+                let newPin = Pin(latitude: annotation?.coordinate.latitude as! Double, longitude: annotation?.coordinate.longitude as! Double, context: stack().privateContext)
                 try stack().saveContext()
                 pins.append(newPin)
             } catch {

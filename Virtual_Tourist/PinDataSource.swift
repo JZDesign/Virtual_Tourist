@@ -13,7 +13,6 @@ import UIKit
 class PinDataSource {
     var pin = Pin()
     var photos = [Photo]()
-    var urls = [NSURL]()
     static let sharedInstance = PinDataSource()
     private init() {}
 }
