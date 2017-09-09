@@ -13,6 +13,8 @@ import CoreData
 
 class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDelegate, UIGestureRecognizerDelegate {
 
+    // MARK: Properties
+    
     
     // Pin
     var pinAnnotationView:MKPinAnnotationView!
@@ -45,6 +47,7 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        
 
         // load previously saved pins
         if let savedPins = loadManagedObject(entityName: "Pin", withPredicate: nil) {
@@ -96,12 +99,12 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
     func mapView(_ mapView: MKMapView, didSelect view: MKAnnotationView) {
 
         for pin in pins {
-
+            // set global pin
             if (view.annotation?.coordinate.latitude == pin.latitude) && (view.annotation?.coordinate.longitude == pin.longitude) {
                 PinDataSource.sharedInstance.pin = pin
             }
-            
         }
+        // delete pin if editing
         if isEditingPins {
             stack().privateContext.delete(PinDataSource.sharedInstance.pin)
             do {
@@ -111,6 +114,7 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
             }
             mapView.removeAnnotation(view.annotation as! MKAnnotation)
         } else {
+            // else send to collection view
             performSegue(withIdentifier: "segue", sender: self)
         }
     }
@@ -161,7 +165,7 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
         if !isEditingPins {
             isEditingPins = true
             editButton.title = "Done"
-            
+            // use constraints to animate view
             UIView.setAnimationCurve(UIViewAnimationCurve.easeInOut)
             UIView.animate(withDuration: 0.5) {
                 self.mapViewTopConstraint.constant = 0
@@ -175,6 +179,7 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
         } else {
             isEditingPins = false
             editButton.title = "Edit"
+            // use constraints to animate view
             UIView.setAnimationCurve(UIViewAnimationCurve.easeInOut)
             UIView.animate(withDuration: 0.5) {
                 self.tapPinsBottom.constant = -100
@@ -184,8 +189,6 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
                 self.view.layoutIfNeeded()
             }
         }
-        // TODO: Select and Delete Pins
-        // TODO: display Label "Tap Pins To Delete" 
     }
    
 }
