@@ -45,13 +45,9 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
                 let pin = item as! Pin
                 pins.append(pin)
                 // display saved pins
-                
-                let lat = CLLocationDegrees(pin.latitude)
-                let long = CLLocationDegrees(pin.longitude)
-                // The lat and long are used to create a CLLocationCoordinates2D instance.
-                let coordinate = CLLocationCoordinate2D(latitude: lat, longitude: long)
+               
                 var annotation = MKPointAnnotation()
-                annotation.coordinate = coordinate
+                annotation.coordinate = CLLocationCoordinate2D(latitude: CLLocationDegrees(pin.latitude), longitude: CLLocationDegrees(pin.longitude))
                 self.mapView.addAnnotation(annotation)
             }
 
@@ -78,7 +74,7 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
         if pinview == nil {
             pinview = MKPinAnnotationView(annotation: annotation, reuseIdentifier: id)
             pinview!.canShowCallout = true
-            pinview!.pinTintColor = .green
+            pinview!.pinTintColor = .purple
             pinview!.canShowCallout = false
             
         } else {

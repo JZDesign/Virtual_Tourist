@@ -14,6 +14,7 @@ class TouristViewController: UIViewController, MKMapViewDelegate, UICollectionVi
     
 
     
+    @IBOutlet var mapView: MKMapView!
     @IBOutlet var collectionView: UICollectionView!
     let cellID = "cellID"
     let touringPin = PinDataSource.sharedInstance.pin
@@ -23,15 +24,27 @@ class TouristViewController: UIViewController, MKMapViewDelegate, UICollectionVi
     // MARK: LifeCycle
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(true)
-
+        
     }
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.navigationController?.navigationBar.backItem?.backBarButtonItem?.title = "Done"
-        self.navigationItem.backBarButtonItem?.style = UIBarButtonItemStyle.done
+        // reset data
+        PinDataSource.sharedInstance.photos = []
+        PinDataSource.sharedInstance.urls = []
+        
+        // add pin
+        let annotation = MKPointAnnotation()
+        annotation.coordinate = CLLocationCoordinate2D(latitude: CLLocationDegrees(touringPin.latitude), longitude: CLLocationDegrees(touringPin.longitude))
+        self.mapView.addAnnotation(annotation)
+        self.mapView.centerCoordinate = annotation.coordinate
+        
+        
+        
         // check for data in core data, if available set cell data
         // if unavailable pull from Flikr, save, then display.
+        
+        // TODO: move download to an action and call the action
         if let count = touringPin.photos?.count {
             if count == 0 {
                 Client.sharedInstance().setSearchParam(touringPin.latitude as! Double, touringPin.longitude as! Double, completion: { (result, error) in
@@ -68,6 +81,14 @@ class TouristViewController: UIViewController, MKMapViewDelegate, UICollectionVi
 
 
 
+    // MARK: MapView
+    
+    func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
+        let pinview = MKPinAnnotationView(annotation: annotation, reuseIdentifier: nil)
+        pinview.pinTintColor = .purple
+        pinview.annotation = annotation
+        return pinview
+    }
  
  
     // MARK: COLLECTION VIEW
@@ -92,7 +113,7 @@ class TouristViewController: UIViewController, MKMapViewDelegate, UICollectionVi
     }
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        //showImageDisplay(UIImage(data: PinDataSource.sharedInstance.photos[indexPath.row].photo as! Data)!)
+        // TODO: Delete cells and the core data attached to them
     }
 
 
@@ -112,6 +133,8 @@ class TouristViewController: UIViewController, MKMapViewDelegate, UICollectionVi
     }
     
    
+    @IBAction func doNewPhotosButton(_ sender: Any) {
+    }
     
    
     

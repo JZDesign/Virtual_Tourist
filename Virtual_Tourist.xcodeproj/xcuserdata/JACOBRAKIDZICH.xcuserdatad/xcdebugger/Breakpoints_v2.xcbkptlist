@@ -10,11 +10,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Virtual_Tourist/TouristViewController.swift"
-            timestampString = "526150134.951686"
+            timestampString = "526614717.776364"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "45"
-            endingLineNumber = "45"
+            startingLineNumber = "58"
+            endingLineNumber = "58"
             landmarkName = "viewDidLoad()"
             landmarkType = "7">
          </BreakpointContent>
@@ -26,11 +26,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Virtual_Tourist/MapViewController.swift"
-            timestampString = "526150033.274652"
+            timestampString = "526614815.296588"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "133"
-            endingLineNumber = "133"
+            startingLineNumber = "129"
+            endingLineNumber = "129"
             landmarkName = "longGesture(sender:)"
             landmarkType = "7">
          </BreakpointContent>

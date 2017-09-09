@@ -71,7 +71,7 @@
                                 </connections>
                             </mapView>
                             <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="PxB-i7-AhU">
-                                <rect key="frame" x="16" y="262" width="343" height="405"/>
+                                <rect key="frame" x="16" y="262" width="343" height="339"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                 <collectionViewFlowLayout key="collectionViewLayout" minimumLineSpacing="8" minimumInteritemSpacing="8" id="qZc-tm-uDd">
                                     <size key="itemSize" width="80" height="80"/>
@@ -117,25 +117,44 @@
                                     <outlet property="delegate" destination="yyR-8N-EhK" id="imq-B9-Osv"/>
                                 </connections>
                             </collectionView>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="DlW-8Y-l87">
+                                <rect key="frame" x="16" y="609" width="343" height="50"/>
+                                <color key="backgroundColor" red="0.25098040700000002" green="0.0" blue="0.50196081400000003" alpha="1" colorSpace="calibratedRGB"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="50" id="NYC-Lu-ZSe"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" style="UICTFontTextStyleHeadline"/>
+                                <state key="normal" title="New Collection">
+                                    <color key="titleColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                </state>
+                                <connections>
+                                    <action selector="doNewPhotosButton:" destination="yyR-8N-EhK" eventType="touchUpInside" id="4AG-Fs-9bO"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <constraints>
                             <constraint firstItem="hKw-zt-xQ4" firstAttribute="leading" secondItem="DmN-Ni-QiX" secondAttribute="leading" id="0nZ-WM-xpw"/>
                             <constraint firstItem="PxB-i7-AhU" firstAttribute="top" secondItem="hKw-zt-xQ4" secondAttribute="bottom" constant="8" id="2F8-3E-stu"/>
+                            <constraint firstItem="Ekr-y1-NTh" firstAttribute="top" secondItem="DlW-8Y-l87" secondAttribute="bottom" constant="8" id="2yp-L1-rWq"/>
+                            <constraint firstItem="DlW-8Y-l87" firstAttribute="leading" secondItem="DmN-Ni-QiX" secondAttribute="leadingMargin" id="3X0-ZW-hjb"/>
+                            <constraint firstItem="DlW-8Y-l87" firstAttribute="top" secondItem="PxB-i7-AhU" secondAttribute="bottom" constant="8" id="Did-nZ-x73"/>
                             <constraint firstItem="hKw-zt-xQ4" firstAttribute="top" secondItem="ucc-iK-IGF" secondAttribute="bottom" id="Gbs-zj-LwH"/>
                             <constraint firstItem="PxB-i7-AhU" firstAttribute="leading" secondItem="DmN-Ni-QiX" secondAttribute="leadingMargin" id="Kyu-IF-jSK"/>
                             <constraint firstAttribute="trailing" secondItem="hKw-zt-xQ4" secondAttribute="trailing" id="SvQ-LQ-0a8"/>
-                            <constraint firstItem="Ekr-y1-NTh" firstAttribute="top" secondItem="PxB-i7-AhU" secondAttribute="bottom" id="Yx3-Ba-5KD"/>
+                            <constraint firstItem="DlW-8Y-l87" firstAttribute="trailing" secondItem="DmN-Ni-QiX" secondAttribute="trailingMargin" id="anc-Vr-yqk"/>
                             <constraint firstItem="PxB-i7-AhU" firstAttribute="trailing" secondItem="DmN-Ni-QiX" secondAttribute="trailingMargin" id="lYc-Rj-aSE"/>
+                            <constraint firstItem="DlW-8Y-l87" firstAttribute="top" secondItem="PxB-i7-AhU" secondAttribute="bottom" constant="8" id="shw-G3-qF0"/>
                         </constraints>
                     </view>
                     <connections>
                         <outlet property="collectionView" destination="PxB-i7-AhU" id="haD-9u-M42"/>
+                        <outlet property="mapView" destination="hKw-zt-xQ4" id="M79-lC-lq8"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Zoc-cZ-LTt" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="2130" y="123"/>
+            <point key="canvasLocation" x="2128.8000000000002" y="122.78860569715144"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="pU1-Nl-a7E">
