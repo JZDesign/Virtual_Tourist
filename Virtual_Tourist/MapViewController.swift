@@ -25,10 +25,13 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
     // pin holder
     var pins = [Pin]()
 
+    // is editing
+    var isEditingPins: Bool = false
     
     
     // OUTLETS
     @IBOutlet var mapView: MKMapView!
+    @IBOutlet var editButton: UIBarButtonItem!
     
     
     
@@ -87,18 +90,25 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
     
     
     func mapView(_ mapView: MKMapView, didSelect view: MKAnnotationView) {
-       
+
         for pin in pins {
-            // display saved pins
-            let lat = pin.latitude
-            let long = pin.longitude
-            if (view.annotation?.coordinate.latitude == lat) && (view.annotation?.coordinate.longitude == long) {
+
+            if (view.annotation?.coordinate.latitude == pin.latitude) && (view.annotation?.coordinate.longitude == pin.longitude) {
                 PinDataSource.sharedInstance.pin = pin
             }
+            
         }
-        
-        performSegue(withIdentifier: "segue", sender: self)
-        
+        if isEditingPins {
+            stack().privateContext.delete(PinDataSource.sharedInstance.pin)
+            do {
+                try stack().saveContext()
+            } catch {
+                print("Could not delete pin")
+            }
+            mapView.removeAnnotation(view.annotation as! MKAnnotation)
+        } else {
+            performSegue(withIdentifier: "segue", sender: self)
+        }
     }
     
     
@@ -140,6 +150,19 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
         
     }
     
+    // MARK: Actions
     
+    @IBAction func doEditButton(_ sender: Any) {
+        if !isEditingPins {
+            isEditingPins = true
+            editButton.title = "Done"
+            
+        } else {
+            isEditingPins = false
+            editButton.title = "Edit"
+        }
+        // TODO: Select and Delete Pins
+        // TODO: display Label "Tap Pins To Delete" 
+    }
    
 }

@@ -201,9 +201,6 @@ class Client: NSObject {
                     }
                 } 
             }
-            
-            print("photo downloaded")
-            
         })
         task.resume()
 

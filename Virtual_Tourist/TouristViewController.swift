@@ -14,6 +14,7 @@ class TouristViewController: UIViewController, MKMapViewDelegate, UICollectionVi
     
 
     // MARK: Outlets
+    @IBOutlet var collectionButton: UIButton!
     @IBOutlet var mapView: MKMapView!
     @IBOutlet var collectionView: UICollectionView!
     
@@ -22,15 +23,23 @@ class TouristViewController: UIViewController, MKMapViewDelegate, UICollectionVi
     let cellID = "cellID"
     // active Pin Annotation
     let touringPin = PinDataSource.sharedInstance.pin
+    var selectedCells: [Int] = []
+    var isSelected: Bool = false
     
     
     
     // MARK: LifeCycle
     
+    
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         // reset data
         resetData()
+        
+        collectionView.allowsMultipleSelection = true
+        
+        
         
         // add pin
         let annotation = MKPointAnnotation()
@@ -81,7 +90,33 @@ class TouristViewController: UIViewController, MKMapViewDelegate, UICollectionVi
     }
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        // TODO: Delete cells and the core data attached to them
+        if !isSelected {
+            isSelected = true
+            collectionButton.titleLabel?.text = "  Delete  Selected  "
+        }
+        
+        let cell = collectionView.cellForItem(at: indexPath)
+        DispatchQueue.main.async {
+            cell?.contentView.alpha = 0.7
+        }
+        
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, didDeselectItemAt indexPath: IndexPath) {
+        let cell = collectionView.cellForItem(at: indexPath)
+        DispatchQueue.main.async {
+            cell?.contentView.alpha = 1.0
+        }
+        
+        if collectionView.indexPathsForSelectedItems == nil {
+            print("Nil")
+        } else {
+            if collectionView.indexPathsForSelectedItems!.count == 0 {
+                isSelected = false
+                collectionButton.titleLabel?.text = "   New Collection   "
+            }
+        }
+        
     }
 
     
@@ -94,7 +129,7 @@ class TouristViewController: UIViewController, MKMapViewDelegate, UICollectionVi
     // MARK: Core Data
     
     func LoadPhotos() {
-        PinDataSource.sharedInstance.photos = []
+        resetData()
         if let savedPhotos = loadManagedObject(entityName: "Photo", withPredicate: NSPredicate(format: "pin = %@", argumentArray: [touringPin])) {
             for item in savedPhotos {
                 let photo = item as! Photo
@@ -117,10 +152,49 @@ class TouristViewController: UIViewController, MKMapViewDelegate, UICollectionVi
 
     }
     
+    func deleteSelected(completion: @escaping (_ completed: Bool) -> Void) {
+        if let selected = collectionView.indexPathsForSelectedItems {
+            for item in selected {
+                selectedCells.append(item.row)
+                collectionView.deselectItem(at: item, animated: false)
+                collectionView.cellForItem(at: item)?.contentView.alpha = 1
+            }
+            
+        }
+        
+        if selectedCells.count > 0 {
+            for item in selectedCells {
+                let photo = PinDataSource.sharedInstance.photos[item]
+                stack().privateContext.delete(photo)
+                do {
+                    try self.stack().saveContext()
+                } catch {
+                    print("Could not remove phot")
+                }
+            }
+        }
+        completion(true)
+    }
     
     // MARK: Actions
    
     @IBAction func doNewPhotosButton(_ sender: Any) {
+        if isSelected {
+            deleteSelected(completion: { (completed) in
+                if completed {
+                    self.LoadPhotos()
+                    self.selectedCells.removeAll()
+                    self.isSelected = false
+                }
+            })
+        } else {
+            newCollection()
+        }
+        
+    }
+    
+    
+    func newCollection() {
         // empty PinDataSource properties and delete existing data
         deletePhotosWithCompletion { (completed) in
             if completed {
@@ -149,7 +223,6 @@ class TouristViewController: UIViewController, MKMapViewDelegate, UICollectionVi
             } // end Completed
         } // end deletePhotosWithCompletion
     }
-        
         
         
    

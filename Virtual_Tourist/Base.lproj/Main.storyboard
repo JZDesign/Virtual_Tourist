@@ -38,9 +38,14 @@
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" title="Virtual Tourist" id="nNH-XH-Pah">
-                        <barButtonItem key="rightBarButtonItem" systemItem="edit" id="F1d-1I-HzE"/>
+                        <barButtonItem key="rightBarButtonItem" title="Edit" id="F1d-1I-HzE">
+                            <connections>
+                                <action selector="doEditButton:" destination="BYZ-38-t0r" id="VTE-WF-A8q"/>
+                            </connections>
+                        </barButtonItem>
                     </navigationItem>
                     <connections>
+                        <outlet property="editButton" destination="F1d-1I-HzE" id="ySL-nP-yY9"/>
                         <outlet property="mapView" destination="lRS-HL-rvw" id="bfG-29-pdZ"/>
                         <segue destination="yyR-8N-EhK" kind="show" identifier="segue" id="Kt6-sF-QUx"/>
                     </connections>
@@ -124,7 +129,7 @@
                                     <constraint firstAttribute="height" constant="50" id="NYC-Lu-ZSe"/>
                                 </constraints>
                                 <fontDescription key="fontDescription" style="UICTFontTextStyleHeadline"/>
-                                <state key="normal" title="New Collection">
+                                <state key="normal" title="   New Collection   ">
                                     <color key="titleColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 </state>
                                 <connections>
@@ -148,6 +153,7 @@
                         </constraints>
                     </view>
                     <connections>
+                        <outlet property="collectionButton" destination="DlW-8Y-l87" id="XBT-3E-ElA"/>
                         <outlet property="collectionView" destination="PxB-i7-AhU" id="haD-9u-M42"/>
                         <outlet property="mapView" destination="hKw-zt-xQ4" id="M79-lC-lq8"/>
                     </connections>
