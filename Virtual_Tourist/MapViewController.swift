@@ -28,6 +28,10 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
     // is editing
     var isEditingPins: Bool = false
     
+    // MARK: Constraints
+    @IBOutlet var mapViewBottomLayout: NSLayoutConstraint!
+    @IBOutlet var mapViewTopConstraint: NSLayoutConstraint!
+    @IBOutlet var tapPinsBottom: NSLayoutConstraint!
     
     // OUTLETS
     @IBOutlet var mapView: MKMapView!
@@ -153,13 +157,32 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
     // MARK: Actions
     
     @IBAction func doEditButton(_ sender: Any) {
+        
         if !isEditingPins {
             isEditingPins = true
             editButton.title = "Done"
             
+            UIView.setAnimationCurve(UIViewAnimationCurve.easeInOut)
+            UIView.animate(withDuration: 0.5) {
+                self.mapViewTopConstraint.constant = 0
+                self.mapViewBottomLayout.constant = 100
+                self.tapPinsBottom.constant = 0
+                self.view.layoutIfNeeded()
+                
+            }
+            
+            
         } else {
             isEditingPins = false
             editButton.title = "Edit"
+            UIView.setAnimationCurve(UIViewAnimationCurve.easeInOut)
+            UIView.animate(withDuration: 0.5) {
+                self.tapPinsBottom.constant = -100
+                self.mapViewTopConstraint.constant = 0
+                self.mapViewBottomLayout.constant = 0
+                
+                self.view.layoutIfNeeded()
+            }
         }
         // TODO: Select and Delete Pins
         // TODO: display Label "Tap Pins To Delete" 
