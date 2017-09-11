@@ -43,15 +43,16 @@ struct CoreDataStack {
         coordinator = NSPersistentStoreCoordinator(managedObjectModel: model)
         
         // create a context and add connect it to the coordinator
-        context = NSManagedObjectContext(concurrencyType: .mainQueueConcurrencyType)
-        context.persistentStoreCoordinator = coordinator
+        //context.persistentStoreCoordinator = coordinator
         
         privateContext = NSManagedObjectContext(concurrencyType: .privateQueueConcurrencyType)
         privateContext.persistentStoreCoordinator = coordinator
+
+        context = NSManagedObjectContext(concurrencyType: .mainQueueConcurrencyType)
+        context.parent = privateContext
         
         // Add a SQLite store located in the documents folder
         let fm = FileManager.default
-        
         guard let docUrl = fm.urls(for: .documentDirectory, in: .userDomainMask).first else {
             print("Unable to reach the documents folder")
             return nil
@@ -93,9 +94,9 @@ internal extension CoreDataStack  {
 extension CoreDataStack {
     
     func saveContext() throws {
-        if context.hasChanges {
+        /*if context.hasChanges {
             try context.save()
-        }
+        }*/
         if privateContext.hasChanges {
             try privateContext.save()
         }

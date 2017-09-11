@@ -20,6 +20,7 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
     var pinAnnotationView:MKPinAnnotationView!
     var pointAnnotation:MKPointAnnotation!
     var annotation:MKAnnotation!
+    var annotationArray: [MKAnnotation] = []
     // Gesture
     var longRecognizer = UILongPressGestureRecognizer()
     // location manager to find user location
@@ -40,10 +41,15 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
     @IBOutlet var editButton: UIBarButtonItem!
     
     
-    
-    
     // MARK: life cycle
     
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        // fix bug that prevents you from clicking on the pin you just left detail view of
+        annotationArray = mapView.annotations
+        mapView.removeAnnotations(mapView.annotations)
+        mapView.addAnnotations(annotationArray)
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -55,10 +61,12 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
                 let pin = item as! Pin
                 pins.append(pin)
                 // display saved pins
-               
-                var annotation = MKPointAnnotation()
-                annotation.coordinate = CLLocationCoordinate2D(latitude: CLLocationDegrees(pin.latitude), longitude: CLLocationDegrees(pin.longitude))
-                self.mapView.addAnnotation(annotation)
+                stack().privateContext.performAndWait {
+                    var annotation = MKPointAnnotation()
+                    annotation.coordinate = CLLocationCoordinate2D(latitude: CLLocationDegrees(pin.latitude), longitude: CLLocationDegrees(pin.longitude))
+                    self.mapView.addAnnotation(annotation)
+                }
+                
             }
 
         }
@@ -70,7 +78,6 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
 
     }
     
-
     
     // MARK: MAP VIEW
 
@@ -100,18 +107,24 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
 
         for pin in pins {
             // set global pin
-            if (view.annotation?.coordinate.latitude == pin.latitude) && (view.annotation?.coordinate.longitude == pin.longitude) {
-                PinDataSource.sharedInstance.pin = pin
+            stack().privateContext.performAndWait {
+                if (view.annotation?.coordinate.latitude == pin.latitude) && (view.annotation?.coordinate.longitude == pin.longitude) {
+                    PinDataSource.sharedInstance.pin = pin
+                }
             }
+            
         }
         // delete pin if editing
         if isEditingPins {
-            stack().privateContext.delete(PinDataSource.sharedInstance.pin)
-            do {
-                try stack().saveContext()
-            } catch {
-                print("Could not delete pin")
+            self.stack().privateContext.perform {
+                self.stack().privateContext.delete(PinDataSource.sharedInstance.pin)
+                do {
+                    try self.stack().saveContext()
+                } catch {
+                    print("Could not delete pin")
+                }
             }
+            
             mapView.removeAnnotation(view.annotation as! MKAnnotation)
         } else {
             // else send to collection view
@@ -132,6 +145,7 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
     // MARK: GESTURE RECOGNIZER
     
     func longGesture(sender: UILongPressGestureRecognizer? = nil) {
+        // if you just use .begin the user can accidentally place inifinitely many pins with one long press on simulator
         if ((sender?.state == UIGestureRecognizerState.ended) || (sender?.state == UIGestureRecognizerState.changed) || (sender?.state == UIGestureRecognizerState.failed) ) {
         } else {
             // create pin for display
@@ -142,14 +156,16 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
             self.annotation = pinAnnotation
         
             // save pin to core data
-            do {
-                let newPin = Pin(latitude: annotation?.coordinate.latitude as! Double, longitude: annotation?.coordinate.longitude as! Double, context: stack().privateContext)
-                try stack().saveContext()
-                pins.append(newPin)
-            } catch {
-                print("Save pins failed")
+            stack().privateContext.performAndWait {
+                do {
+                    let newPin = Pin(latitude: self.annotation?.coordinate.latitude as! Double, longitude: self.annotation?.coordinate.longitude as! Double, context: self.stack().privateContext)
+                    try self.stack().saveContext()
+                    self.pins.append(newPin)
+                } catch {
+                    print("Save pins failed")
+                }
+
             }
-            
             
             // display pins
             mapView.addAnnotation(self.annotation)

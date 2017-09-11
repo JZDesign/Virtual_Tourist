@@ -6,6 +6,32 @@
 //  Copyright © 2017 Jacob Rakidzich. All rights reserved.
 //
 
+/*
+ 
+ convenience init(imageData: NSData?, url: String?, context: NSManagedObjectContext) {
+ if let entity = NSEntityDescription.entity(forEntityName: "Photo", in: context) {
+ self.init(entity: entity, insertInto: context)
+ self.photo = imageData
+ self.url = url
+ } else {
+ fatalError("Unable To Find Entity Name!")
+ }
+ }
+ 
+ convenience init(latitude: Double, longitude: Double, context: NSManagedObjectContext) {
+ if let entity = NSEntityDescription.entity(forEntityName: "Pin", in: context) {
+ self.init(entity: entity, insertInto: context)
+ self.latitude   = latitude
+ self.longitude  = longitude
+ } else {
+ fatalError("Unable To Find Entity Name!")
+ }
+ }
+ 
+ */
+
+
+
 import UIKit
 import CoreData
 

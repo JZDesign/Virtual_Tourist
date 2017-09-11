@@ -22,15 +22,11 @@ class TouristViewController: UIViewController, MKMapViewDelegate, UICollectionVi
     // reuseID
     let cellID = "cellID"
     // active Pin Annotation
-    let touringPin = PinDataSource.sharedInstance.pin
+    var touringPin = Pin()
     var selectedCells: [Int] = []
     var isSelected: Bool = false
     
-    
-    
     // MARK: LifeCycle
-    
-    
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -39,30 +35,34 @@ class TouristViewController: UIViewController, MKMapViewDelegate, UICollectionVi
         
         collectionView.allowsMultipleSelection = true
         
-        
-        
         // add pin
-        let annotation = MKPointAnnotation()
-        annotation.coordinate = CLLocationCoordinate2D(latitude: CLLocationDegrees(touringPin.latitude), longitude: CLLocationDegrees(touringPin.longitude))
-        self.mapView.addAnnotation(annotation)
-        self.mapView.centerCoordinate = annotation.coordinate
         
-        // check for data in core data, if available set cell data
-        // if unavailable pull from Flikr, save, then display.
         
-        if let count = touringPin.photos?.count {
-            if count == 0 {
-                doNewPhotosButton(self)
-                
-            } else {
-                LoadPhotos()
-            }
-        } // end if let count = touringPin.photos count
+        self.stack().privateContext.performAndWait({
+            self.touringPin = PinDataSource.sharedInstance.pin
+        })
+        
+        stack().privateContext.performAndWait {
+            let annotation = MKPointAnnotation()
+            annotation.coordinate = CLLocationCoordinate2D(latitude: CLLocationDegrees(self.touringPin.latitude), longitude: CLLocationDegrees(self.touringPin.longitude))
+            
+            self.mapView.addAnnotation(annotation)
+            self.mapView.centerCoordinate = annotation.coordinate
+            
+            // check for data in core data, if available set cell data
+            // if unavailable pull from Flikr, save, then display.
+            
+            if let count = self.touringPin.photos?.count {
+                if count == 0 {
+                    self.doNewPhotosButton(self)
+                    
+                } else {
+                    self.LoadPhotos()
+                }
+            } // end if let count = touringPin.photos count
+        }
+
     } // end view did load
-
-
-    
-    
 
     // MARK: MapView
     
@@ -73,9 +73,7 @@ class TouristViewController: UIViewController, MKMapViewDelegate, UICollectionVi
         return pinview
     }
  
- 
     // MARK: COLLECTION VIEW
-    
 
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return PinDataSource.sharedInstance.photos.count
@@ -85,7 +83,15 @@ class TouristViewController: UIViewController, MKMapViewDelegate, UICollectionVi
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: cellID, for: indexPath) as! CollectionViewCell
         cell.activityIndicator.startAnimating()
-        cell.initWithPhoto(PinDataSource.sharedInstance.photos[indexPath.row])
+        stack().privateContext.perform {
+            if let photo = PinDataSource.sharedInstance.photos[indexPath.row].photo  {
+                cell.imageview.image = UIImage(data: photo as Data)
+                cell.activityIndicator.stopAnimating()
+            } else {
+                cell.initWithPhoto(PinDataSource.sharedInstance.photos[indexPath.row])
+            }
+        }
+        
         return cell
     }
     
@@ -118,8 +124,9 @@ class TouristViewController: UIViewController, MKMapViewDelegate, UICollectionVi
         }
         
     }
-
     
+    
+
     func reloadCollectionView() {
         DispatchQueue.main.async {
             self.collectionView.reloadData()
@@ -142,12 +149,14 @@ class TouristViewController: UIViewController, MKMapViewDelegate, UICollectionVi
     }
     
     func deletePhotosWithCompletion(completion: @escaping (_ completed: Bool) -> Void) {
-        for item in PinDataSource.sharedInstance.photos {
-            stack().privateContext.delete(item)
-        }
         resetData()
         
-        self.reloadCollectionView()
+        for item in PinDataSource.sharedInstance.photos {
+            stack().privateContext.perform {
+                self.stack().privateContext.delete(item)
+            }
+            
+        }
         completion(true)
 
     }
@@ -165,12 +174,15 @@ class TouristViewController: UIViewController, MKMapViewDelegate, UICollectionVi
         if selectedCells.count > 0 {
             for item in selectedCells {
                 let photo = PinDataSource.sharedInstance.photos[item]
-                stack().privateContext.delete(photo)
-                do {
-                    try self.stack().saveContext()
-                } catch {
-                    print("Could not remove phot")
+                stack().privateContext.perform {
+                    self.stack().privateContext.delete(photo)
+                    do {
+                        try self.stack().saveContext()
+                    } catch {
+                        print("Could not remove phot")
+                    }
                 }
+                
             }
         }
         completion(true)
@@ -188,7 +200,8 @@ class TouristViewController: UIViewController, MKMapViewDelegate, UICollectionVi
                 }
             })
         } else {
-            newCollection()
+            
+            self.newCollection()
         }
         
     }
@@ -199,32 +212,41 @@ class TouristViewController: UIViewController, MKMapViewDelegate, UICollectionVi
         deletePhotosWithCompletion { (completed) in
             if completed {
                 // doDownload
-                Client.sharedInstance().setSearchParam(self.touringPin.latitude as! Double, self.touringPin.longitude as! Double, completion: { (result, error) in
-                    if error != nil {
-                        print(error)
-                    } else {
-                        for url in (result?.enumerated())! {
-                            // create photo managed object and persist
-                            let photo = NSEntityDescription.insertNewObject(forEntityName: "Photo", into: self.stack().privateContext) as! Photo
-                            photo.url = url.element.absoluteString
-                            photo.pin = PinDataSource.sharedInstance.pin
-                            // add photo to datasource for use in the collection view.
-                            PinDataSource.sharedInstance.photos.append(photo)
-                            do {
-                                try (self.stack().privateContext.save())
-                            } catch let err {
-                                print(err)
-                            }
+                self.reloadCollectionView()
+                self.stack().privateContext.perform {
+                    Client.sharedInstance().setSearchParam(self.touringPin.latitude as! Double, self.touringPin.longitude as! Double, completion: { (result, error) in
+                        if error != nil {
+                            print(error)
+                        } else {
+                            
+                            for url in (result?.enumerated())! {
+                                // create photo managed object and persist
+                                    self.stack().privateContext.perform {
+                                        let photo = NSEntityDescription.insertNewObject(forEntityName: "Photo", into: self.stack().privateContext) as! Photo
+                                        photo.url = url.element.absoluteString
+                                        photo.pin = PinDataSource.sharedInstance.pin
+                                        // add photo to datasource for use in the collection view.
+                                        PinDataSource.sharedInstance.photos.append(photo)
+                                        
+                                        
+                                        do {
+                                            try (self.stack().privateContext.save())
+                                        } catch let err {
+                                            print(err)
+                                        }
+                                        self.reloadCollectionView()
+
+                                    } // end privateContext.perform
+                            
+                            } // end for statement
                             self.reloadCollectionView()
-                        } // end for statement
-                        self.reloadCollectionView()
-                    } // end if error ELSE
-                }) // end setSearchParam()
+                        } // end if error ELSE
+                    }) // end setSearchParam()
+                }
+                
             } // end Completed
+
         } // end deletePhotosWithCompletion
     }
-        
-        
-   
-    
+  
 }

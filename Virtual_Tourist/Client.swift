@@ -37,7 +37,7 @@ class Client: NSObject {
         let searchType = [Constants.FlickrParameterKeys.BoundingBox: bboxString(latitude,longitude)]
         let accuracy = [Constants.FlickrParameterKeys.Accuracy: 11]
         let location = [Constants.FlickrParameterKeys.Lat : latitude, Constants.FlickrParameterKeys.Lon : longitude]
-        let amount = ["page": 1, "per_page": 50, "sort": ""] as [String : Any]
+        let amount = ["page": 1, "per_page": 4000, "sort": ""] as [String : Any]
         let prefix = [Constants.FlickrParameterKeys.Method: Constants.FlickrParameterValues.SearchMethod,
                       Constants.FlickrParameterKeys.APIKey: Constants.FlickrParameterValues.APIKey]
         let middle = [Constants.FlickrParameterKeys.Extras: Constants.FlickrParameterValues.MediumURL]
@@ -189,16 +189,18 @@ class Client: NSObject {
                 let data = try! Data(contentsOf: url!)
                 let delegate = UIApplication.shared.delegate as? AppDelegate
                 if let context = delegate?.stack.privateContext {
-                    
-                    photo.photo = data as NSData
-                    photo.pin = PinDataSource.sharedInstance.pin
-                    
-                    do {
-                        try (context.save())
-                        completion(true, nil)
-                    } catch let err {
-                        print(err)
+                    context.perform {
+                        photo.photo = data as NSData
+                        photo.pin = PinDataSource.sharedInstance.pin
+                        
+                        do {
+                            try (context.save())
+                            completion(true, nil)
+                        } catch let err {
+                            print(err)
+                        }
                     }
+                    
                 } 
             }
         })
@@ -210,9 +212,9 @@ class Client: NSObject {
     
     func rndImg(urls: [NSURL]) -> [NSURL] {
         var result: [NSURL] = []
-        if urls.count >= 30 {
+        if urls.count >= 15 {
             var rnd:[Int] = []
-            while rnd.count < 30 {
+            while rnd.count < 15 {
                 
                 let random = arc4random_uniform(UInt32(urls.count))
                 if !rnd.contains(Int(random)) { rnd.append(Int(random)) }

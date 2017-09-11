@@ -40,19 +40,30 @@ extension UIViewController {
     
     func loadManagedObject(entityName: String, withPredicate: NSPredicate?) -> [NSManagedObject]? {
         var managedObjects: [NSManagedObject] = []
-        do {
-            let fetchedRC = fetchedResultsController(entityName: entityName, withPredicate: withPredicate)
-            try fetchedRC.performFetch()
-            let count = try fetchedRC.managedObjectContext.count(for: fetchedRC.fetchRequest)
-            for item in 0..<count {
-                managedObjects.append(fetchedRC.object(at: IndexPath(row: item, section: 0)) as! NSManagedObject)
+        var shouldReturn = false
+        stack().privateContext.performAndWait {
+            do {
+            
+                let fetchedRC = self.fetchedResultsController(entityName: entityName, withPredicate: withPredicate)
+                try fetchedRC.performFetch()
+                let count = try fetchedRC.managedObjectContext.count(for: fetchedRC.fetchRequest)
+                for item in 0..<count {
+                    managedObjects.append(fetchedRC.object(at: IndexPath(row: item, section: 0)) as! NSManagedObject)
+                }
+            
+                shouldReturn = true
+                
+            } catch {
+                shouldReturn = false
             }
-            
+        }
+        
+        if shouldReturn {
             return managedObjects
-            
-        } catch {
+        } else {
             return nil
         }
+       
         
         
     }

@@ -21,15 +21,9 @@ class CollectionViewCell: UICollectionViewCell {
     
     func initWithPhoto(_ photo: Photo) {
         self.activityIndicator.hidesWhenStopped = true
-        if photo.photo != nil {
-            DispatchQueue.main.async {
-                self.imageview.image = UIImage(data: photo.photo! as Data)
-                self.activityIndicator.stopAnimating()
-            }
-        } else {
-            // do photo Download
-            downloadPhoto(photo: photo)
-        }
+        // do photo Download
+        self.downloadPhoto(photo: photo)
+        
     }
     
    
