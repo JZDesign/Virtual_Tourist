@@ -81,19 +81,43 @@ class TouristViewController: UIViewController, MKMapViewDelegate, UICollectionVi
     
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: cellID, for: indexPath) as! CollectionViewCell
+        cell.activityIndicator.hidesWhenStopped = true
         cell.activityIndicator.startAnimating()
+        
         stack().privateContext.perform {
+            
             if let photo = PinDataSource.sharedInstance.photos[indexPath.row].photo  {
+                
                 cell.imageview.image = UIImage(data: photo as Data)
                 cell.activityIndicator.stopAnimating()
             } else {
-                cell.initWithPhoto(PinDataSource.sharedInstance.photos[indexPath.row])
+                
+                let photo = PinDataSource.sharedInstance.photos[indexPath.row]
+                let request = URLRequest(url: URL(string: photo.url!)!)
+                Client.sharedInstance().doPhotoDownload(request: request, photo: photo, completion: { (completed, error) in
+                    if completed {
+                        if let image = UIImage(data: photo.photo! as Data) {
+                            DispatchQueue.main.async {
+                                cell.imageview.image = image
+                                cell.activityIndicator.stopAnimating()
+                            }
+                        } else {
+                            print("Could not get image from data")
+                        }
+                    } else { // not completed
+                        print(error?.localizedDescription ?? "ERROR! Could not doPhotoDownload")
+                        
+                    }
+                }) // end doPhotoDownload()
             }
         }
         
         return cell
     }
+    
+    
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         if !isSelected {
@@ -149,13 +173,10 @@ class TouristViewController: UIViewController, MKMapViewDelegate, UICollectionVi
     }
     
     func deletePhotosWithCompletion(completion: @escaping (_ completed: Bool) -> Void) {
-        resetData()
-        
         for item in PinDataSource.sharedInstance.photos {
             stack().privateContext.perform {
                 self.stack().privateContext.delete(item)
             }
-            
         }
         completion(true)
 
@@ -211,6 +232,7 @@ class TouristViewController: UIViewController, MKMapViewDelegate, UICollectionVi
         // empty PinDataSource properties and delete existing data
         deletePhotosWithCompletion { (completed) in
             if completed {
+                self.resetData()
                 // doDownload
                 self.reloadCollectionView()
                 self.stack().privateContext.perform {

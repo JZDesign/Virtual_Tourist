@@ -18,33 +18,5 @@ class CollectionViewCell: UICollectionViewCell {
         super.prepareForReuse()
     }
     
-    
-    func initWithPhoto(_ photo: Photo) {
-        self.activityIndicator.hidesWhenStopped = true
-        // do photo Download
-        self.downloadPhoto(photo: photo)
         
-    }
-    
-   
-    func downloadPhoto(photo: Photo) {
-        let request = URLRequest(url: URL(string: photo.url!)!)
-        Client.sharedInstance().doPhotoDownload(request: request, photo: photo, completion: { (completed, error) in
-            if completed {
-                if let image = UIImage(data: photo.photo! as Data) {
-                    DispatchQueue.main.async {
-                        self.imageview.image = image
-                        self.activityIndicator.stopAnimating()
-                    }
-                } else {
-                    print("Could not get image from data")
-                }
-            } else { // not completed
-                print(error?.localizedDescription ?? "ERROR! Could not doPhotoDownload")
-
-            }
-        }) // end doPhotoDownload()
-        
-    }
-    
 }

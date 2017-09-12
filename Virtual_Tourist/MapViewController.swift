@@ -17,7 +17,6 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
     
     
     // Pin
-    var pinAnnotationView:MKPinAnnotationView!
     var pointAnnotation:MKPointAnnotation!
     var annotation:MKAnnotation!
     var annotationArray: [MKAnnotation] = []
@@ -53,7 +52,8 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+        // directory path
+        //print(FileManager.default.urls(for: .documentDirectory, in: .userDomainMask))
 
         // load previously saved pins
         if let savedPins = loadManagedObject(entityName: "Pin", withPredicate: nil) {
@@ -94,11 +94,13 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
             pinview!.pinTintColor = .purple
             pinview!.canShowCallout = false
             
+            
         } else {
             pinview!.annotation = annotation
         }
         
         pinview?.animatesDrop = true
+        pinview?.isDraggable = true
         return pinview
     }
     
@@ -146,14 +148,21 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
     
     func longGesture(sender: UILongPressGestureRecognizer? = nil) {
         // if you just use .begin the user can accidentally place inifinitely many pins with one long press on simulator
-        if ((sender?.state == UIGestureRecognizerState.ended) || (sender?.state == UIGestureRecognizerState.changed) || (sender?.state == UIGestureRecognizerState.failed) ) {
-        } else {
-            // create pin for display
-            let pin = longRecognizer.location(in: mapView)
+        let pin = sender!.location(in: mapView)
+        if (sender?.state == UIGestureRecognizerState.began ) {
             let pinLocation = mapView.convert(pin, toCoordinateFrom: mapView)
             let pinAnnotation = MKPointAnnotation()
             pinAnnotation.coordinate = pinLocation
             self.annotation = pinAnnotation
+        } else if (sender?.state == UIGestureRecognizerState.changed) {
+            let pinLocation = mapView.convert(pin, toCoordinateFrom: mapView)
+            let pinAnnotation = MKPointAnnotation()
+            pinAnnotation.coordinate = pinLocation
+            self.annotation = pinAnnotation
+        } else {
+        
+            
+            
         
             // save pin to core data
             stack().privateContext.performAndWait {

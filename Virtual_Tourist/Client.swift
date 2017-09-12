@@ -182,30 +182,30 @@ class Client: NSObject {
     // MARK: DoPhotodownload
     
     func doPhotoDownload(request: URLRequest, photo: Photo, completion: @escaping(_ completed: Bool, _ error: NSError?)-> Void)  {
-        let task = URLSession.shared.downloadTask(with: request, completionHandler: { url, response, error in
-            if let error = error {
-                completion(false, error as NSError)
-            } else {
-                let data = try! Data(contentsOf: url!)
-                let delegate = UIApplication.shared.delegate as? AppDelegate
-                if let context = delegate?.stack.privateContext {
-                    context.perform {
-                        photo.photo = data as NSData
-                        photo.pin = PinDataSource.sharedInstance.pin
-                        
-                        do {
-                            try (context.save())
-                            completion(true, nil)
-                        } catch let err {
-                            print(err)
+        let session = URLSession.shared
+        let task = session.dataTask(with: request) { (data, response, error) in
+            if error == nil {
+                if let data = data {
+                    let delegate = UIApplication.shared.delegate as? AppDelegate
+                    if let context = delegate?.stack.privateContext {
+                        context.perform {
+                            photo.photo = data as! NSData
+                            photo.pin = PinDataSource.sharedInstance.pin
+                            
+                            do {
+                                try (context.save())
+                                completion(true, nil)
+                            } catch let err {
+                                print(err)
+                            }
                         }
                     }
-                    
-                } 
+                }
+            } else {
+                completion(false, error as? NSError)
             }
-        })
+        }
         task.resume()
-
     }
     
     // MARK: Randomize results
