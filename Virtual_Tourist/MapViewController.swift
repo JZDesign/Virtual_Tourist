@@ -53,7 +53,7 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
     override func viewDidLoad() {
         super.viewDidLoad()
         // directory path
-        //print(FileManager.default.urls(for: .documentDirectory, in: .userDomainMask))
+        // print(FileManager.default.urls(for: .documentDirectory, in: .userDomainMask))
 
         // load previously saved pins
         if let savedPins = loadManagedObject(entityName: "Pin", withPredicate: nil) {
