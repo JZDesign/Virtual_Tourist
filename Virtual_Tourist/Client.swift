@@ -67,7 +67,6 @@ class Client: NSObject {
     // search int is to let the method know to find the random page or display the random image.
     private func displayImageFromFlickrBySearch(_ methodParameters: [String: AnyObject], completion: @escaping (_ result: [NSURL]?, _ error: NSError?) -> Void){
         
-        
         let session = URLSession.shared
         let request = URLRequest(url: flickrURLFromParameters(methodParameters))
         let task = session.dataTask(with: request) { (data, response, error) in
@@ -148,7 +147,7 @@ class Client: NSObject {
             }
             
             
-                // check for photos and photo keys
+            // check for photos and photo keys
             guard let photosDictionary = parsedResult[Constants.FlickrResponseKeys.Photos] as? [String:AnyObject], let photoArray = photosDictionary[Constants.FlickrResponseKeys.Photo] as? [[String:AnyObject]] else {
                     print("cannot find keys '\(Constants.FlickrResponseKeys.Photos)' and '\(Constants.FlickrResponseKeys.Photo)' in '\(parsedResult)'")
                 let userInfo = [NSLocalizedDescriptionKey : "cannot find keys '\(Constants.FlickrResponseKeys.Photos)' and '\(Constants.FlickrResponseKeys.Photo)' in '\(parsedResult)'"]
@@ -183,28 +182,29 @@ class Client: NSObject {
     
     func doPhotoDownload(request: URLRequest, photo: Photo, completion: @escaping(_ completed: Bool, _ error: NSError?)-> Void)  {
         let session = URLSession.shared
+        // do task to find photo data
         let task = session.dataTask(with: request) { (data, response, error) in
             if error == nil {
+                // check photo data and save photo
                 if let data = data {
                     let delegate = UIApplication.shared.delegate as? AppDelegate
                     if let context = delegate?.stack.privateContext {
                         context.perform {
                             photo.photo = data as! NSData
                             photo.pin = PinDataSource.sharedInstance.pin
-                            
                             do {
                                 try (context.save())
                                 completion(true, nil)
                             } catch let err {
                                 print(err)
                             }
-                        }
-                    }
-                }
+                        } // end perform.
+                    } // end if let context
+                } // end if let data
             } else {
                 completion(false, error as? NSError)
             }
-        }
+        } // end task
         task.resume()
     }
     
@@ -212,15 +212,14 @@ class Client: NSObject {
     
     func rndImg(urls: [NSURL]) -> [NSURL] {
         var result: [NSURL] = []
+        // pull 15 random photos from downloaded results
         if urls.count >= 15 {
             var rnd:[Int] = []
             while rnd.count < 15 {
-                
                 let random = arc4random_uniform(UInt32(urls.count))
                 if !rnd.contains(Int(random)) { rnd.append(Int(random)) }
             }
             for item in rnd {
-                
                 result.append(urls[item])
             }
             return result

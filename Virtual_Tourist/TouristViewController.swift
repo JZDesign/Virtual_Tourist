@@ -89,17 +89,19 @@ class TouristViewController: UIViewController, MKMapViewDelegate, UICollectionVi
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: cellID, for: indexPath) as! CollectionViewCell
+        // set cell properties for upcoming photo task
         cell.activityIndicator.hidesWhenStopped = true
         cell.activityIndicator.startAnimating()
+        cell.imageview.image = nil
         
         stack().privateContext.perform ({
             
             if let photo = PinDataSource.sharedInstance.photos[indexPath.row].photo  {
-                
+                // if photo already exists, display photo
                 cell.imageview.image = UIImage(data: photo as Data)
                 cell.activityIndicator.stopAnimating()
             } else {
-                
+                // download photo from url
                 let photo = PinDataSource.sharedInstance.photos[indexPath.row]
                 let request = URLRequest(url: URL(string: photo.url!)!)
                 Client.sharedInstance().doPhotoDownload(request: request, photo: photo, completion: { (completed, error) in
@@ -113,13 +115,15 @@ class TouristViewController: UIViewController, MKMapViewDelegate, UICollectionVi
                         } else {
                             print("Could not get image from data")
                         }
+                        
                     } else { // not completed
                         print(error?.localizedDescription ?? "ERROR! Could not doPhotoDownload")
-                        
                     }
+                    
                 }) // end doPhotoDownload()
-            }
-        })
+            } // end else - photo download
+        }) // end privateContext.perform
+        
         return cell
     }
     
@@ -127,10 +131,11 @@ class TouristViewController: UIViewController, MKMapViewDelegate, UICollectionVi
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         if !isSelected {
+            // if first item selected change button text
             isSelected = true
             collectionButton.setTitle("  Delete  Selected  ", for: .normal)
         }
-        
+        // change item opacity
         let cell = collectionView.cellForItem(at: indexPath)
         DispatchQueue.main.async {
             cell?.contentView.alpha = 0.7
@@ -140,6 +145,7 @@ class TouristViewController: UIViewController, MKMapViewDelegate, UICollectionVi
     
     func collectionView(_ collectionView: UICollectionView, didDeselectItemAt indexPath: IndexPath) {
         let cell = collectionView.cellForItem(at: indexPath)
+        // change item opacity back to normal
         DispatchQueue.main.async {
             cell?.contentView.alpha = 1.0
         }
@@ -148,6 +154,7 @@ class TouristViewController: UIViewController, MKMapViewDelegate, UICollectionVi
             print("Nil")
         } else {
             if collectionView.indexPathsForSelectedItems!.count == 0 {
+                // if last item deselected change button text
                 isSelected = false
                 resetButton()
             }
@@ -182,6 +189,7 @@ class TouristViewController: UIViewController, MKMapViewDelegate, UICollectionVi
         // clear collection view
         self.resetData()
         self.reloadCollectionView()
+        // iterate through saved photos, delete the photo then save the context.
         for item in photos{
             stack().privateContext.perform {
                 self.stack().privateContext.delete(item)
@@ -190,13 +198,14 @@ class TouristViewController: UIViewController, MKMapViewDelegate, UICollectionVi
                 } catch {
                     print("Could not remove photo")
                 }
-            }
-        }
+            } // end privateContext.perform
+        } // end for item in photos
         completion(true)
 
     }
     
     func deleteSelected(completion: @escaping (_ completed: Bool) -> Void) {
+        // migrate selected items to placeholder for deleting
         if let selected = collectionView.indexPathsForSelectedItems {
             for item in selected {
                 selectedCells.append(item.row)
@@ -205,7 +214,7 @@ class TouristViewController: UIViewController, MKMapViewDelegate, UICollectionVi
             }
             
         }
-        
+        // iterate through selected items and remove them from core data
         if selectedCells.count > 0 {
             for item in selectedCells {
                 let photo = PinDataSource.sharedInstance.photos[item]
@@ -216,16 +225,18 @@ class TouristViewController: UIViewController, MKMapViewDelegate, UICollectionVi
                     } catch {
                         print("Could not remove phot")
                     }
-                }
-                
-            }
-        }
+                    
+                } // end privateContext.perform
+            } // end for item in selectedCells
+        } // end if selectedCells.count > 0
+        
         completion(true)
     }
     
     // MARK: Actions
     
     func resetButton() {
+        // reset NewCollection button to defaults
         collectionButton.isEnabled = true
         collectionButton.isUserInteractionEnabled = true
         collectionButton.setTitle("   New Collection   ", for: .normal)
@@ -237,6 +248,7 @@ class TouristViewController: UIViewController, MKMapViewDelegate, UICollectionVi
         collectionButton.isUserInteractionEnabled = false
         collectionButton.setTitle("     Loading...     ", for: .disabled)
 
+        // if user selected photos in collectionView, delete those photos and reload data
         if isSelected {
             deleteSelected(completion: { (completed) in
                 if completed {
@@ -247,7 +259,7 @@ class TouristViewController: UIViewController, MKMapViewDelegate, UICollectionVi
                 }
             })
         } else {
-
+            // if no photos are selected fetch 15 new photos from location after deleting existing photos.
             newCollection(completion: { (completed) in
                 if completed {
                     self.reloadCollectionView()
@@ -273,7 +285,7 @@ class TouristViewController: UIViewController, MKMapViewDelegate, UICollectionVi
                         if error != nil {
                             print(error)
                         } else {
-                            
+                            // iterate through results and persist data
                             for url in (result?.enumerated())! {
                                 // create photo managed object and persist
                                 self.stack().privateContext.performAndWait {

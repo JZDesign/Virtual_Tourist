@@ -10,11 +10,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Virtual_Tourist/MapViewController.swift"
-            timestampString = "526880846.594238"
+            timestampString = "527355512.861854"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "169"
-            endingLineNumber = "169"
+            startingLineNumber = "156"
+            endingLineNumber = "156"
             landmarkName = "longGesture(sender:)"
             landmarkType = "7">
          </BreakpointContent>

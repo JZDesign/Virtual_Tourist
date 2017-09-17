@@ -65,11 +65,9 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
                     var annotation = MKPointAnnotation()
                     annotation.coordinate = CLLocationCoordinate2D(latitude: CLLocationDegrees(pin.latitude), longitude: CLLocationDegrees(pin.longitude))
                     self.mapView.addAnnotation(annotation)
-                }
-                
-            }
-
-        }
+                }// end privateContext.perform
+            } // end for item in savedPins
+        }// end if let
         
         // init long gesture recognizer
         longRecognizer = UILongPressGestureRecognizer(target: self, action: #selector(self.longGesture(sender:)))
@@ -93,8 +91,6 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
             pinview!.canShowCallout = true
             pinview!.pinTintColor = .purple
             pinview!.canShowCallout = false
-            
-            
         } else {
             pinview!.annotation = annotation
         }
@@ -113,9 +109,9 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
                 if (view.annotation?.coordinate.latitude == pin.latitude) && (view.annotation?.coordinate.longitude == pin.longitude) {
                     PinDataSource.sharedInstance.pin = pin
                 }
-            }
-            
-        }
+            } // end privateContext.perform
+        } // end for pin in pins
+        
         // delete pin if editing
         if isEditingPins {
             self.stack().privateContext.perform {
@@ -125,20 +121,14 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
                 } catch {
                     print("Could not delete pin")
                 }
-            }
-            
+            }// end privateContext.perform
             mapView.removeAnnotation(view.annotation as! MKAnnotation)
         } else {
             // else send to collection view
             performSegue(withIdentifier: "segue", sender: self)
         }
     }
-    
-    
-   
-    
-    // remove current pins
-    
+ 
     func removePins() {
         self.mapView.removeAnnotations(self.mapView.annotations)
     }
@@ -147,7 +137,7 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
     // MARK: GESTURE RECOGNIZER
     
     func longGesture(sender: UILongPressGestureRecognizer? = nil) {
-        // if you just use .begin the user can accidentally place inifinitely many pins with one long press on simulator
+        // enable draggable gesture
         let pin = sender!.location(in: mapView)
         if (sender?.state == UIGestureRecognizerState.began ) {
             let pinLocation = mapView.convert(pin, toCoordinateFrom: mapView)
@@ -161,9 +151,6 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
             self.annotation = pinAnnotation
         } else {
         
-            
-            
-        
             // save pin to core data
             stack().privateContext.performAndWait {
                 do {
@@ -173,12 +160,10 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
                 } catch {
                     print("Save pins failed")
                 }
-
             }
             
             // display pins
             mapView.addAnnotation(self.annotation)
-    
         }
         
     }
@@ -186,7 +171,7 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
     // MARK: Actions
     
     @IBAction func doEditButton(_ sender: Any) {
-        
+        // enable pin deletion
         if !isEditingPins {
             isEditingPins = true
             editButton.title = "Done"
@@ -197,11 +182,10 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
                 self.mapViewBottomLayout.constant = 100
                 self.tapPinsBottom.constant = 0
                 self.view.layoutIfNeeded()
-                
             }
             
-            
         } else {
+            // disable pin deletion
             isEditingPins = false
             editButton.title = "Edit"
             // use constraints to animate view
@@ -210,7 +194,6 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
                 self.tapPinsBottom.constant = -100
                 self.mapViewTopConstraint.constant = 0
                 self.mapViewBottomLayout.constant = 0
-                
                 self.view.layoutIfNeeded()
             }
         }

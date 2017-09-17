@@ -11,9 +11,7 @@ import UIKit
 class CollectionViewCell: UICollectionViewCell {
     @IBOutlet var imageview: UIImageView!
     @IBOutlet var activityIndicator: UIActivityIndicatorView!
-    
-    
-    
+
     override func prepareForReuse() {
         super.prepareForReuse()
     }
